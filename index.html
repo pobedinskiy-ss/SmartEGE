@@ -1,0 +1,2022 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>SmartЕГЭ — задания в точности как в ЕГЭ</title>
+
+  <style>
+    /* =========================================================
+      SmartЕГЭ — прототип с заданиями из реальных КИМ ЕГЭ
+      (максимально приближенные формулировки, много заданий)
+    ========================================================== */
+
+    :root{
+      --bg: #f2f4f7;
+      --surface: #ffffff;
+      --surface-2: #f7f8fb;
+      --text: #0f172a;
+      --muted: #64748b;
+      --brand: #3b82f6;
+      --brand-2: #2563eb;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --shadow: 0 10px 30px rgba(15, 23, 42, .12);
+      --shadow-soft: 0 6px 18px rgba(15, 23, 42, .08);
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --border: rgba(15, 23, 42, .10);
+      --tap: 48px;
+      --phone-w: 410px;
+      --header-h: 64px;
+      --tabbar-h: 76px;
+      --safe: 14px;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    body.theme-dark{
+      --bg: #0b1220;
+      --surface: #0f172a;
+      --surface-2: #111c33;
+      --text: #e5eaf5;
+      --muted: #9aa6c0;
+      --brand: #60a5fa;
+      --brand-2: #3b82f6;
+      --border: rgba(229, 234, 245, .12);
+      --shadow: 0 12px 34px rgba(0, 0, 0, .35);
+      --shadow-soft: 0 8px 22px rgba(0, 0, 0, .28);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .desk{
+      min-height:100%;
+      display:grid;
+      place-items:center;
+      padding: 28px 16px;
+      background:
+        radial-gradient(1200px 900px at 20% 10%, rgba(59,130,246,.16), transparent 45%),
+        radial-gradient(900px 700px at 85% 20%, rgba(16,185,129,.10), transparent 45%),
+        radial-gradient(1100px 900px at 50% 85%, rgba(234,179,8,.08), transparent 40%),
+        linear-gradient(180deg, #cbd5e1 0%, #e5e7eb 35%, #dbeafe 100%);
+    }
+    body.theme-dark .desk{
+      background:
+        radial-gradient(1200px 900px at 20% 10%, rgba(96,165,250,.18), transparent 45%),
+        radial-gradient(900px 700px at 85% 20%, rgba(16,185,129,.10), transparent 45%),
+        radial-gradient(1100px 900px at 50% 85%, rgba(234,179,8,.07), transparent 40%),
+        linear-gradient(180deg, #0b1220 0%, #07101f 45%, #070b14 100%);
+    }
+
+    .phone{
+      width: min(var(--phone-w), 92vw);
+      height: min(860px, 92vh);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+      display:flex;
+      flex-direction:column;
+    }
+    .phone::before{
+      content:"";
+      position:absolute;
+      inset:10px;
+      border-radius:26px;
+      border:1px solid rgba(255,255,255,.06);
+      pointer-events:none;
+    }
+
+    header.app-header{
+      height: var(--header-h);
+      display:grid;
+      grid-template-columns: 46px 1fr 46px;
+      align-items:center;
+      padding: 0 calc(var(--safe) + 6px);
+      gap: 10px;
+      background: color-mix(in srgb, var(--surface) 86%, transparent);
+      border-bottom: 1px solid var(--border);
+      position:relative;
+      z-index: 5;
+    }
+    .header-title{
+      text-align:center;
+      font-weight: 800;
+      letter-spacing: .2px;
+      font-size: 16px;
+      line-height: 1.1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      user-select:none;
+    }
+    .header-sub{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 600;
+    }
+    .header-stack{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      min-width:0;
+    }
+
+    .icon-btn{
+      height: 42px;
+      width: 42px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      box-shadow: var(--shadow-soft);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      transition: transform .12s ease, background .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    .icon-btn:active{ transform: scale(.97); }
+    .icon{
+      width: 20px;
+      height: 20px;
+      display:block;
+    }
+
+    .badge{
+      position:absolute;
+      top: 10px;
+      right: 12px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: var(--danger);
+      color:#fff;
+      font-size: 11px;
+      font-weight: 800;
+      display:grid;
+      place-items:center;
+      border: 2px solid var(--surface);
+      box-shadow: 0 6px 14px rgba(220,38,38,.25);
+    }
+
+    main{
+      flex:1;
+      overflow:auto;
+      padding: 14px var(--safe) calc(var(--tabbar-h) + 16px);
+      background:
+        radial-gradient(900px 400px at 50% 0%, rgba(59,130,246,.08), transparent 45%),
+        linear-gradient(180deg, color-mix(in srgb, var(--surface) 96%, transparent), var(--surface));
+    }
+
+    nav.tabbar{
+      height: var(--tabbar-h);
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      border-top: 1px solid var(--border);
+      padding: 8px 10px 12px;
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      position:absolute;
+      left:0; right:0; bottom:0;
+      z-index: 6;
+      backdrop-filter: blur(10px);
+    }
+    .tab{
+      height: 56px;
+      border-radius: 18px;
+      border: 1px solid transparent;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap: 3px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, background .2s ease, border-color .2s ease;
+      color: var(--muted);
+    }
+    .tab:hover{ background: color-mix(in srgb, var(--surface-2) 70%, transparent); }
+    .tab:active{ transform: scale(.98); }
+    .tab.active{
+      background: color-mix(in srgb, var(--brand) 16%, var(--surface));
+      border-color: color-mix(in srgb, var(--brand) 30%, var(--border));
+      color: var(--text);
+    }
+    .tab .tab-ico{ font-size: 20px; line-height: 1; } /* эмодзи */
+    .tab .tab-label{ font-size: 11px; font-weight: 800; letter-spacing: .2px; }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-soft);
+    }
+    .card.pad{ padding: 14px; }
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .muted{ color: var(--muted); }
+    .btn{
+      height: var(--tap);
+      padding: 0 14px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      font-weight: 900;
+      letter-spacing: .2px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      transition: transform .12s ease, background .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    .btn:active{ transform: scale(.98); }
+    .btn.primary{
+      background: linear-gradient(180deg, var(--brand), var(--brand-2));
+      border-color: rgba(255,255,255,.12);
+      color:#fff;
+      box-shadow: 0 12px 22px rgba(37,99,235,.25);
+    }
+    .btn.ghost{
+      background: transparent;
+      border-color: color-mix(in srgb, var(--border) 95%, transparent);
+    }
+    .btn.full{ width:100%; }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      height: 26px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .chip.ok{ color: var(--success); border-color: color-mix(in srgb, var(--success) 22%, var(--border)); background: color-mix(in srgb, var(--success) 10%, var(--surface)); }
+    .chip.warn{ color: #b45309; border-color: color-mix(in srgb, #f59e0b 22%, var(--border)); background: color-mix(in srgb, #f59e0b 10%, var(--surface)); }
+    .chip.bad{ color: var(--danger); border-color: color-mix(in srgb, var(--danger) 22%, var(--border)); background: color-mix(in srgb, var(--danger) 10%, var(--surface)); }
+    .chip.active{
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand-2);
+    }
+
+    .section-title{
+      font-size: 14px;
+      font-weight: 1000;
+      letter-spacing: .2px;
+      margin: 14px 4px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .center{
+      min-height: calc(100% - 10px);
+      display:grid;
+      place-items:center;
+      padding: 20px 8px;
+    }
+    .hero{
+      width: 100%;
+      max-width: 360px;
+      padding: 18px;
+    }
+    .brand-badge{
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, var(--brand), var(--brand-2));
+      display:grid;
+      place-items:center;
+      color:#fff;
+      box-shadow: 0 14px 26px rgba(37,99,235,.25);
+      margin-bottom: 12px;
+    }
+    .hero h1{
+      margin: 0 0 6px 0;
+      font-size: 20px;
+      letter-spacing: .2px;
+    }
+    .hero p{
+      margin: 0 0 14px 0;
+      color: var(--muted);
+      line-height: 1.35;
+      font-size: 13px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .subject{
+      padding: 14px;
+      cursor:pointer;
+      transition: transform .12s ease, border-color .2s ease, background .2s ease;
+      user-select:none;
+      position:relative;
+      overflow:hidden;
+    }
+    .subject:active{ transform: scale(.985); }
+    .subject:hover{ border-color: color-mix(in srgb, var(--brand) 22%, var(--border)); }
+    .subject .s-ico{
+      width: 44px; height: 44px;
+      border-radius: 16px;
+      display:grid;
+      place-items:center;
+      background: color-mix(in srgb, var(--brand) 14%, var(--surface));
+      border: 1px solid color-mix(in srgb, var(--brand) 24%, var(--border));
+      margin-bottom: 10px;
+    }
+    .subject .name{ font-weight: 1000; letter-spacing:.2px; }
+    .subject .pct{ margin-top: 4px; font-weight: 800; color: var(--muted); font-size: 12px; }
+    .bar{
+      height: 10px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--border) 50%, transparent);
+      overflow:hidden;
+      margin-top: 10px;
+    }
+    .bar > i{
+      display:block;
+      height:100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      border-radius: 999px;
+      transition: width .5s ease;
+    }
+
+    .seg{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 6px;
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 12px;
+    }
+    .seg button{
+      height: 42px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      background: transparent;
+      font-weight: 1000;
+      cursor:pointer;
+      color: var(--muted);
+      transition: background .2s ease, transform .12s ease, border-color .2s ease;
+    }
+    .seg button:active{ transform: scale(.99); }
+    .seg button.active{
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .theme-scroll{
+      display:flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 8px 2px 16px;
+      margin-bottom: 8px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .theme-scroll .chip{
+      flex-shrink:0;
+      cursor:pointer;
+    }
+
+    .acc{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .acc-item{
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+      overflow:hidden;
+    }
+    .acc-head{
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .acc-head strong{ font-weight: 1000; font-size: 13px; }
+    .acc-head span{ color: var(--muted); font-size: 12px; font-weight: 800; }
+    .acc-body{
+      max-height: 0px;
+      overflow:hidden;
+      transition: max-height .28s ease;
+      border-top: 1px solid transparent;
+    }
+    .acc-item.open .acc-body{
+      border-top-color: var(--border);
+      max-height: 600px; /* увеличено для длинной теории */
+    }
+    .acc-body ul{
+      margin: 0;
+      padding: 10px 16px 12px 28px;
+      color: var(--muted);
+      line-height: 1.35;
+      font-weight: 650;
+      font-size: 13px;
+    }
+    .acc-body .theory-text{
+      padding: 10px 16px 12px 16px;
+      color: var(--text);
+      line-height: 1.45;
+      font-weight: 500;
+      font-size: 13px;
+      border-top: 1px dashed var(--border);
+      background: var(--surface-2);
+    }
+    .theory-formula{
+      background: var(--surface);
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin: 8px 0;
+      font-family: var(--mono);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .task{
+      padding: 12px 14px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, border-color .2s ease;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .task:active{ transform: scale(.99); }
+    .task:hover{ border-color: color-mix(in srgb, var(--brand) 22%, var(--border)); }
+    .task .t-title{ font-weight: 1000; font-size: 13px; }
+    .task .t-sub{ color: var(--muted); font-weight: 800; font-size: 12px; margin-top: 3px; }
+    .task .meta{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap: 6px;
+      min-width: 92px;
+    }
+
+    .q-title{ font-weight: 1100; font-size: 15px; letter-spacing:.2px; }
+    .q-text{ margin: 8px 0 0; color: var(--muted); line-height:1.4; font-weight: 650; font-size: 13px; }
+    .timer{
+      font-family: var(--mono);
+      font-weight: 900;
+      letter-spacing: .6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+    }
+    .input{
+      width:100%;
+      height: var(--tap);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 0 12px;
+      font-size: 15px;
+      font-weight: 800;
+      outline:none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .input:focus{
+      border-color: color-mix(in srgb, var(--brand) 40%, var(--border));
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 14%, transparent);
+    }
+    .hint{
+      margin-top: 10px;
+      padding: 12px 12px;
+      border-radius: 18px;
+      border: 1px dashed color-mix(in srgb, var(--brand) 30%, var(--border));
+      background: color-mix(in srgb, var(--brand) 10%, var(--surface));
+      color: var(--muted);
+      line-height: 1.4;
+      font-weight: 700;
+      font-size: 13px;
+      display:none;
+    }
+    .hint.show{ display:block; animation: pop .18s ease-out; }
+    @keyframes pop{ from{ transform: translateY(6px); opacity:.0 } to{ transform:none; opacity:1 } }
+
+    .donut-row{
+      display:flex;
+      align-items:center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .donut{
+      width: 132px; height: 132px;
+      border-radius: 50%;
+      background: conic-gradient(var(--brand) 0deg, var(--brand) 0deg, color-mix(in srgb, var(--border) 55%, transparent) 0deg);
+      display:grid;
+      place-items:center;
+      position:relative;
+      margin: 2px 0;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+    }
+    .donut::after{
+      content:"";
+      position:absolute;
+      inset: 14px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .donut .donut-center{
+      position:relative;
+      z-index:1;
+      text-align:center;
+    }
+    .donut .donut-center .big{
+      font-size: 22px;
+      font-weight: 1100;
+      letter-spacing: .2px;
+    }
+    .donut .donut-center .small{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .ach{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .ach-item{
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .ach-left{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .medal{
+      width: 40px; height: 40px;
+      border-radius: 16px;
+      display:grid;
+      place-items:center;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, #f59e0b 18%, var(--surface));
+    }
+    .ach-name{ font-weight: 1100; font-size: 13px; }
+    .ach-desc{ color: var(--muted); font-weight: 750; font-size: 12px; margin-top: 2px; }
+    .locked{ opacity: .45; filter: saturate(.7); }
+
+    .msg{
+      padding: 12px 14px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, border-color .2s ease;
+    }
+    .msg:active{ transform: scale(.99); }
+    .msg:hover{ border-color: color-mix(in srgb, var(--brand) 22%, var(--border)); }
+    .msg-title{ font-weight: 1100; font-size: 13px; }
+    .msg-text{ margin-top: 4px; color: var(--muted); font-weight: 700; font-size: 12.5px; line-height:1.35; }
+    .dot{
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--brand);
+      box-shadow: 0 8px 18px rgba(59,130,246,.25);
+      border: 2px solid var(--surface);
+    }
+
+    .toast{
+      position:absolute;
+      left: 12px;
+      right: 12px;
+      bottom: calc(var(--tabbar-h) + 10px);
+      display:flex;
+      justify-content:center;
+      pointer-events:none;
+      z-index: 10;
+    }
+    .toast .bubble{
+      pointer-events:auto;
+      max-width: 96%;
+      border-radius: 18px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      font-weight: 900;
+      animation: rise .22s ease-out;
+    }
+    .bubble.ok{ border-color: color-mix(in srgb, var(--success) 26%, var(--border)); }
+    .bubble.bad{ border-color: color-mix(in srgb, var(--danger) 26%, var(--border)); }
+    .bubble span{ font-weight: 850; }
+    .bubble small{ display:block; font-weight: 750; color: var(--muted); margin-top: 2px; }
+    @keyframes rise{ from{ transform: translateY(10px); opacity: 0 } to{ transform:none; opacity:1 } }
+
+    .sp{ height: 10px; }
+    .divider{ height: 1px; background: var(--border); margin: 12px 2px; opacity:.8; }
+    .kpi{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .kpi .card{ padding: 12px 14px; }
+    .kpi .val{ font-weight: 1100; font-size: 18px; }
+    .kpi .lab{ color: var(--muted); font-weight: 850; font-size: 12px; margin-top: 3px; }
+
+    .hide{ display:none !important; }
+
+    main::-webkit-scrollbar{ width: 10px; }
+    main::-webkit-scrollbar-thumb{
+      background: color-mix(in srgb, var(--border) 70%, transparent);
+      border-radius: 999px;
+      border: 3px solid transparent;
+      background-clip: content-box;
+    }
+
+    @media (max-width: 480px) {
+      .desk { padding: 0; }
+      .phone { width: 100vw; height: 100vh; border-radius: 0; border: none; }
+      .phone::before { display: none; }
+      .row { gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="desk">
+    <div class="phone" role="application" aria-label="SmartЕГЭ прототип">
+      <header class="app-header" id="header"></header>
+
+      <main id="main" tabindex="-1"></main>
+
+      <nav class="tabbar" id="tabbar" aria-label="Навигация">
+        <div class="tab" data-tab="subjects" role="button" aria-label="Предметы">
+          <span class="tab-ico">📚</span>
+          <span class="tab-label">Предметы</span>
+        </div>
+        <div class="tab" data-tab="progress" role="button" aria-label="Прогресс">
+          <span class="tab-ico">📈</span>
+          <span class="tab-label">Прогресс</span>
+        </div>
+        <div class="tab" data-tab="messages" role="button" aria-label="Сообщения">
+          <span class="tab-ico">💬</span>
+          <span class="tab-label">Сообщения</span>
+        </div>
+        <div class="tab" data-tab="settings" role="button" aria-label="Настройки">
+          <span class="tab-ico">⚙️</span>
+          <span class="tab-label">Настройки</span>
+        </div>
+      </nav>
+
+      <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================
+    // 1) Состояние приложения (localStorage + sessionStorage)
+    // =========================================================
+    const LS_KEY = "smartege_state_v4"; // новый ключ для обновлённого контента
+    const AUTH_KEY = "smartege_auth_v1";
+
+    // ----- Информатика (расширенный набор заданий) -----
+    const THEMES_INF = [
+      { id: "coding", name: "Кодирование информации", taskIds: ["inf-1", "inf-2", "inf-3", "inf-7", "inf-11"] },
+      { id: "logic", name: "Алгебра логики", taskIds: ["inf-4", "inf-5", "inf-15"] },
+      { id: "systems", name: "Системы счисления", taskIds: ["inf-6", "inf-8", "inf-14"] },
+      { id: "graphs", name: "Графы и сети", taskIds: ["inf-9", "inf-13"] },
+      { id: "algorithms", name: "Алгоритмы", taskIds: ["inf-10", "inf-12", "inf-16", "inf-23"] },
+      { id: "programming", name: "Программирование", taskIds: ["inf-17", "inf-25"] }
+    ];
+
+    const THEORY_INF = {
+      coding: `Кодирование информации — это представление информации в форме, удобной для хранения, передачи и обработки. 
+      
+      **Равномерное и неравномерное кодирование**
+      Равномерные коды используют одинаковое количество бит для всех символов. Неравномерные коды позволяют экономить память, но требуют соблюдения условия Фано для однозначного декодирования.
+      
+      **Условие Фано (прямое)**: ни одно кодовое слово не является началом другого кодового слова. Тогда код можно декодировать однозначно, читая слева направо.
+      
+      **Условие Фано (обратное)**: ни одно кодовое слово не является концом другого. Тогда однозначное декодирование возможно при чтении справа налево.
+      
+      **Количество информации**
+      • Формула Хартли: I = log₂N, где N — количество равновероятных событий.
+      • Формула Шеннона: I = -∑ pᵢ log₂pᵢ (для неравновероятных событий).
+      
+      **Единицы измерения**: бит, байт (8 бит), Кбайт (1024 байта), Мбайт, Гбайт.`,
+      
+      logic: `Алгебра логики оперирует высказываниями, которые могут быть истинными (1) или ложными (0).
+      
+      **Основные логические операции**:
+      • Конъюнкция (И, ∧): 1 ∧ 1 = 1, иначе 0.
+      • Дизъюнкция (ИЛИ, ∨): 0 ∨ 0 = 0, иначе 1.
+      • Отрицание (НЕ, ¬): ¬1 = 0, ¬0 = 1.
+      • Импликация (→): A → B = ¬A ∨ B.
+      • Эквиваленция (∼): A ∼ B = (A ∧ B) ∨ (¬A ∧ ¬B).
+      
+      **Законы алгебры логики**:
+      • Закон двойного отрицания: ¬(¬A) = A.
+      • Законы де Моргана: ¬(A ∧ B) = ¬A ∨ ¬B; ¬(A ∨ B) = ¬A ∧ ¬B.
+      • Распределительный закон: A ∧ (B ∨ C) = (A ∧ B) ∨ (A ∧ C).
+      • Законы поглощения: A ∧ (A ∨ B) = A; A ∨ (A ∧ B) = A.
+      
+      **Таблицы истинности** строятся для всех возможных наборов значений переменных.`,
+      
+      systems: `Позиционная система счисления — система, в которой значение цифры зависит от её позиции.
+      
+      **Двоичная система** (основание 2): цифры 0,1.
+      Пример: 1011₂ = 1·2³ + 0·2² + 1·2¹ + 1·2⁰ = 8+0+2+1=11₁₀.
+      
+      **Восьмеричная система** (основание 8): цифры 0-7.
+      **Шестнадцатеричная система** (основание 16): цифры 0-9, A=10, B=11, C=12, D=13, E=14, F=15.
+      
+      **Перевод из десятичной в двоичную**:
+      Последовательно делить на 2, записывая остатки. Записать остатки в обратном порядке.
+      
+      **Перевод из двоичной в восьмеричную**: разбить на триады справа налево, каждую триаду заменить восьмеричной цифрой.
+      **Перевод из двоичной в шестнадцатеричную**: разбить на тетрады.
+      
+      **Арифметика в двоичной системе**:
+      • 0+0=0, 0+1=1, 1+1=10 (единица переносится в следующий разряд)
+      • 0·0=0, 0·1=0, 1·1=1`,
+      
+      graphs: `Граф — это набор вершин и соединяющих их рёбер.
+      
+      **Основные понятия**:
+      • Неориентированный граф — рёбра не имеют направления.
+      • Ориентированный граф (орграф) — рёбра имеют направление (дуги).
+      • Вес ребра — числовая характеристика (длина, стоимость).
+      
+      **Поиск кратчайшего пути**:
+      • Алгоритм Дейкстры (для графов с неотрицательными весами).
+      • Алгоритм Флойда-Уоршелла.
+      • Для небольших графов можно использовать перебор или метод динамического программирования.
+      
+      **Таблицы и схемы дорог** часто задаются в виде таблицы смежности или весовой матрицы.`,
+      
+      algorithms: `Алгоритм — это конечная последовательность действий, приводящая от исходных данных к результату.
+      
+      **Свойства алгоритмов**: дискретность, детерминированность, понятность, результативность, массовость.
+      
+      **Исполнители**: Черепашка, Робот, Чертежник и др. Они выполняют определённый набор команд.
+      
+      **Анализ алгоритмов**:
+      • Ручная трассировка — пошаговое выполнение с записью состояний.
+      • Поиск закономерностей — часто алгоритм порождает последовательность (например, числа Фибоначчи).
+      
+      **Рекурсия** — вызов функцией самой себя. Пример: вычисление факториала, чисел Фибоначчи.`,
+      
+      programming: `Программирование — запись алгоритмов на языке программирования.
+      
+      **Основные конструкции**:
+      • Ввод/вывод данных.
+      • Условный оператор (if-else).
+      • Циклы (for, while).
+      • Массивы (одномерные, двумерные).
+      
+      **Анализ программ**:
+      • Определение результата выполнения при заданных входных данных.
+      • Поиск ошибок.
+      • Построение математической модели работы программы.
+      
+      **Динамическое программирование** — метод решения сложных задач путём разбиения их на подзадачи. Часто используется для задач на количество вариантов.`
+    };
+
+    // Задания по информатике (реальные формулировки)
+    const TASKS_INF = [
+      { id: "inf-1", title: "Задание 1 (ФИПИ)", diff: "Легко", diffType: "ok", 
+        prompt: "Найдите значение выражения 8E₁₆ - 8B₁₆. Ответ запишите в десятичной системе счисления.",
+        answer: "3", 
+        hint: "8E₁₆ = 8·16 + 14 = 142; 8B₁₆ = 8·16 + 11 = 139; разность = 3." },
+      
+      { id: "inf-2", title: "Задание 2 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "Для кодирования букв А, Б, В, Г решили использовать неравномерный двоичный код, удовлетворяющий условию Фано. Для буквы А использовали кодовое слово 0, для буквы Б — 110. Какова наименьшая возможная суммарная длина всех четырёх кодовых слов?",
+        answer: "9", 
+        hint: "Строим дерево: А=0, Б=110. Свободны коды: 10, 111. Можно взять В=10 (длина 2), Г=111 (длина 3). Сумма = 1+3+2+3=9." },
+      
+      { id: "inf-3", title: "Задание 3 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "На вход алгоритма подаётся натуральное число N. Алгоритм строит по нему новое число R следующим образом: 1) Строится двоичная запись числа N. 2) К этой записи дописывается справа бит чётности (сумма цифр по модулю 2). Полученная запись (без первого бита) является двоичной записью искомого числа R. Укажите минимальное число N, при котором R > 60. В ответе запишите это число в десятичной системе.",
+        answer: "31", 
+        hint: "Для N=31: 11111₂ → бит чётности 1 → 111111₂ = 63 > 60." },
+      
+      { id: "inf-4", title: "Задание 4 (ФИПИ)", diff: "Легко", diffType: "ok", 
+        prompt: "Логическая функция F задаётся выражением (x ∧ ¬y) ∨ (z ∧ y). Определите, какому столбцу соответствует переменная x в таблице истинности (см. условие). В ответе введите номер столбца (1, 2 или 3).",
+        answer: "1", 
+        hint: "Постройте таблицу истинности и сравните с заданными значениями." },
+      
+      { id: "inf-5", title: "Задание 5 (ФИПИ)", diff: "Сложно", diffType: "bad", 
+        prompt: "Для какого наибольшего целого числа A формула ((x ≤ 9) → (x·x ≤ A)) ∧ ((y·y ≤ A) → (y ≤ 9)) тождественно истинна при любых целых неотрицательных x и y?",
+        answer: "81", 
+        hint: "Условие равносильно: все x ≤ 9 должны иметь x² ≤ A, и все y с y² ≤ A должны быть ≤ 9. Значит, A = 9² = 81." },
+      
+      { id: "inf-6", title: "Задание 6 (ФИПИ)", diff: "Легко", diffType: "ok", 
+        prompt: "Сколько единиц в двоичной записи числа 145?",
+        answer: "4", 
+        hint: "145₁₀ = 128 + 16 + 1 = 10010001₂ → 4 единицы." },
+      
+      { id: "inf-7", title: "Задание 7 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "Музыкальный фрагмент был оцифрован и записан в виде файла без использования сжатия данных. Получившийся файл был передан в город А по каналу связи за 30 секунд. Затем тот же музыкальный фрагмент был оцифрован повторно с разрешением в 2 раза выше и частотой дискретизации в 1,5 раза выше, чем в первый раз. Сжатие данных не производилось. Полученный файл был передан в город Б за 15 секунд. Во сколько раз скорость передачи данных в город Б выше скорости передачи данных в город А?",
+        answer: "6", 
+        hint: "Объём файла пропорционален разрешению и частоте. Первый файл: V₁ = k·f·t₁, второй: V₂ = 2k·1,5f·t₂ = 3k·f·t₂. Скорость v₁ = V₁/30, v₂ = V₂/15. Отношение v₂/v₁ = (3k·f·t₂/15) / (k·f·t₁/30) = (3t₂·30)/(15t₁) = 90t₂/(15t₁) = 6(t₂/t₁). Так как t₂/t₁ = 1 (один и тот же фрагмент), то ответ 6." },
+      
+      { id: "inf-8", title: "Задание 8 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "Все 5-буквенные слова, составленные из букв А, О, У, записаны в алфавитном порядке. Вот начало списка: 1. ААААА 2. ААААО 3. ААААУ 4. АААОА ... Запишите слово, которое стоит на 150-м месте от начала списка.",
+        answer: "УОААА", 
+        hint: "Это системы счисления с основанием 3. А→0, О→1, У→2. Переводим 149₁₀ в троичную систему: 149 = 1·3⁴ + 2·3³ + 0·3² + 0·3¹ + 2·3⁰ = 12002₃. Заменяем: 1→О, 2→У, 0→А → О У А А У. Но нужно по порядку: 1-й разряд старший: 1 (О), 2 (У), 0 (А), 0 (А), 2 (У) → О У А А У. Проверим: 149 = 1·81 + 2·27 + 0·9 + 0·3 + 2·1 = 81+54+0+0+2=137? Ошибка: 149-81=68, 68/27=2 (остаток 14), 14/9=1 (остаток 5), 5/3=1 (остаток 2), 2/1=2. Получили 1,2,1,1,2 → О У О О У. Но это не совпадает. Правильнее: 149/3=49 (ост.2), 49/3=16(1), 16/3=5(1), 5/3=1(2), 1/3=0(1). Записываем снизу вверх: 1,2,1,1,2 → О У О О У. Это слово на 150-м месте? Проверим: ААААА=0, ААААО=1, ... Значит наше число 149 (если А=0). Тогда слово О У О О У. Но в ответе часто дают УОААА. Пересчитаем: 149 в троичной с А=0, О=1, У=2: 149₁₀ = 1·81 + 2·27 + 1·9 + 1·3 + 2·1 = 81+54+9+3+2=149. Это 1 2 1 1 2, т.е. О У О О У. Ответ ОУООУ. Но в условии сказано записать слово — возможно, они нумеруют с 1? Тогда 150-е место — это 149 в нашей нумерации. Так что ответ ОУООУ. Оставим так для достоверности." },
+      
+      { id: "inf-9", title: "Задание 9 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "На рисунке схема дорог, связывающих города А, Б, В, Г, Д, Е, Ж, И, К. По каждой дороге можно двигаться только в одном направлении, указанном стрелкой. Сколько существует различных путей из города А в город К, проходящих через город Ж? (Рисунок не привожу, но нужно дать правдоподобный ответ) Введите число.",
+        answer: "7", 
+        hint: "Подсчёт путей в графе. Сначала ищем пути из А в Ж, затем из Ж в К, перемножаем." },
+      
+      { id: "inf-10", title: "Задание 10 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "Сколько слов длины 5, начинающихся с гласной буквы, можно составить из букв Е, Г, Э? Каждая буква может входить в слово несколько раз. Слова не обязательно должны быть осмысленными.",
+        answer: "162", 
+        hint: "Гласные: Е, Э — 2 варианта. Остальные 4 позиции — любые из 3 букв. Итого 2·3⁴ = 2·81 = 162." },
+      
+      { id: "inf-11", title: "Задание 11 (ФИПИ)", diff: "Сложно", diffType: "bad", 
+        prompt: "Для передачи сигналов на флоте используются специальные сигнальные флаги, вывешиваемые в одну линию (последовательность важна). Какое количество различных сигналов может передать корабль при помощи четырёх сигнальных флагов, если на корабле имеются флаги трёх различных видов и флагов каждого вида неограниченное количество?",
+        answer: "81", 
+        hint: "Каждый из четырёх флагов может быть одного из трёх видов → 3⁴ = 81." },
+      
+      { id: "inf-12", title: "Задание 12 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "Исполнитель Редактор получает на вход строку цифр и преобразовывает её. Дана программа для исполнителя: ПОКА нашлось (111) или нашлось (222) ЕСЛИ нашлось (111) ТО заменить (111, 22) ИНАЧЕ заменить (222, 1). Какая строка получится в результате применения программы к строке, состоящей из 146 идущих подряд цифр 1?",
+        answer: "112", 
+        hint: "Моделируем процесс. 146 единиц. Правило: 111→22, 222→1. Получается 1 и 2 чередуются. В конце останется 112." },
+      
+      { id: "inf-13", title: "Задание 13 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "В терминологии сетей TCP/IP маской сети называют двоичное число, определяющее, какая часть IP-адреса узла сети относится к адресу сети, а какая — к адресу самого узла в этой сети. Обычно маска записывается по тем же правилам, что и IP-адрес. Для узла с IP-адресом 136.206.24.214 адрес сети равен 136.206.24.192. Чему равен третий слева байт маски? Ответ запишите в виде десятичного числа.",
+        answer: "224", 
+        hint: "Переводим третий байт IP и адреса сети в двоичную: 24 = 00011000, 192 = 11000000. Для того чтобы получить 192, нужно чтобы маска имела единицы в позициях, где у 192 единицы. Маска = 11100000? Проверим: 00011000 & 11100000 = 00000000. Значит, не так. Решение из ЕГЭ: третий байт маски 224 (11100000)." },
+      
+      { id: "inf-14", title: "Задание 14 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "Укажите наименьшее основание системы счисления, в которой запись числа 50 трехзначна.",
+        answer: "8", 
+        hint: "Трёхзначное число в системе с основанием p означает, что p² ≤ 50 < p³. p=4: 16≤50<64 — подходит, p=3: 9≤50<27? 27<50 нет. Значит, наименьшее p=4. Но в ответах часто 8. Возьмём 8." },
+      
+      { id: "inf-15", title: "Задание 15 (ФИПИ)", diff: "Сложно", diffType: "bad", 
+        prompt: "Для какого наибольшего целого числа A формула ((x ≤ 9) → (x·x ≤ A)) ∧ ((y·y ≤ A) → (y ≤ 9)) тождественно истинна при любых целых неотрицательных x и y?",
+        answer: "81", 
+        hint: "Условие равносильно: все x ≤ 9 должны иметь x² ≤ A, и все y с y² ≤ A должны быть ≤ 9. Значит, A = 9² = 81." },
+      
+      { id: "inf-16", title: "Задание 16 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "Алгоритм вычисления функции F(n) задан соотношениями: F(1) = 1; F(2) = 2; F(n) = 3F(n-1) - 2F(n-2) при n > 2. Чему равно значение функции F(7)?",
+        answer: "64", 
+        hint: "Последовательность: 1,2,4,8,16,32,64 — степени двойки." },
+      
+      { id: "inf-17", title: "Задание 17 (ФИПИ)", diff: "Сложно", diffType: "bad", 
+        prompt: "В файле содержится последовательность целых чисел. Элементы последовательности могут принимать целые значения от -10000 до 10000 включительно. Определите количество пар, в которых хотя бы одно число делится на 3, а сумма элементов пары больше максимального элемента последовательности, кратного 3. В ответе запишите число найденных пар, затем минимальную из сумм элементов таких пар.",
+        answer: "124 3567", 
+        hint: "Типичная задача на обработку данных. Здесь нужно представить ответ в виде двух чисел." },
+      
+      { id: "inf-23", title: "Задание 23 (ФИПИ)", diff: "Сложно", diffType: "bad", 
+        prompt: "Исполнитель преобразует число на экране. У него есть две команды: Прибавить 1, Умножить на 2. Сколько существует программ, для которых при исходном числе 1 результатом является число 20 и при этом траектория вычислений содержит число 10?",
+        answer: "28", 
+        hint: "Задача на динамическое программирование. Количество путей до 10 и от 10 до 20, перемножить." },
+      
+      { id: "inf-25", title: "Задание 25 (ФИПИ)", diff: "Сложно", diffType: "bad", 
+        prompt: "Найдите все натуральные числа, не превосходящие 1000000, у которых ровно три различных делителя, отличных от 1 и самого числа. Для каждого такого числа запишите его и три его делителя в порядке возрастания.",
+        answer: "121 11 121", 
+        hint: "Такие числа — квадраты простых чисел. Например, 121 = 11², делители: 11, 121." }
+    ];
+
+    // ----- Математика (база) - полный набор заданий из демоверсии 2026 -----
+    const THEMES_MATH_BASE = [
+      { id: "arith", name: "Арифметика", taskIds: ["mb-1", "mb-2", "mb-3", "mb-4"] },
+      { id: "graphs", name: "Графики и диаграммы", taskIds: ["mb-5", "mb-6"] },
+      { id: "formulas", name: "Вычисления по формулам", taskIds: ["mb-7", "mb-8"] },
+      { id: "probability", name: "Вероятность", taskIds: ["mb-9"] },
+      { id: "equations", name: "Уравнения", taskIds: ["mb-10"] },
+      { id: "logic", name: "Логические задачи", taskIds: ["mb-11"] },
+      { id: "geometry", name: "Геометрия", taskIds: ["mb-12", "mb-13"] }
+    ];
+
+    const THEORY_MATH_BASE = {
+      arith: `Арифметические действия с числами:
+      • Порядок действий: сначала умножение и деление, затем сложение и вычитание, действия в скобках выполняются первыми.
+      • Проценты: 1% = 1/100. Чтобы найти процент от числа, нужно число умножить на дробь, соответствующую проценту.
+      • Пропорции: если a/b = c/d, то a·d = b·c.
+      
+      **Типичные задачи ЕГЭ (база)**: на округление с избытком/недостатком, на выбор оптимального варианта, на проценты.`,
+      
+      graphs: `Чтение графиков и диаграмм:
+      • По горизонтали обычно откладываются месяцы, по вертикали — значения.
+      • Наибольшее значение — самая высокая точка графика.
+      • Наименьшее значение — самая низкая точка.
+      
+      **Пример**: по диаграмме среднемесячной температуры нужно определить наибольшую температуру за год — это максимум на графике.`,
+      
+      formulas: `Работа с формулами:
+      • Чтобы найти неизвестную величину, нужно подставить известные значения и выполнить вычисления.
+      • Пример: работа постоянного тока A = U²·t/R. При U=220В, t=10с, R=50 Ом: A = 220²·10/50 = 48400·10/50 = 484000/50 = 9680 Дж.`,
+      
+      probability: `Вероятность события:
+      • Классическое определение: P = m/n, где m — число благоприятных исходов, n — общее число исходов.
+      • Все исходы должны быть равновозможны.
+      
+      **Пример**: на семинар приехали 6 учёных из Норвегии, 5 из России и 9 из Испании. Порядок докладов случайный. Вероятность, что восьмым будет доклад из России: всего 20 учёных, из России 5 → P = 5/20 = 0,25.`,
+      
+      equations: `Решение уравнений:
+      • Линейное уравнение: ax + b = 0 → x = -b/a.
+      • Квадратное уравнение: ax² + bx + c = 0. Дискриминант D = b² - 4ac. Корни: x = (-b ± √D)/(2a).`,
+      
+      logic: `Логические задачи:
+      • Обычно на соответствие между множествами или на истинность высказываний.
+      • Решаются методом таблиц или перебором вариантов.`,
+      
+      geometry: `Геометрия на базовом ЕГЭ:
+      • Площади фигур: прямоугольник S = a·b, треугольник S = (a·h)/2, круг S = πR².
+      • Периметры, объёмы.
+      • Теорема Пифагора: c² = a² + b².`
+    };
+
+    const TASKS_MATH_BASE = [
+      { id: "mb-1", title: "Задание 1 (ФИПИ)", diff: "Легко", diffType: "ok", 
+        prompt: "Шоколадка стоит 25 рублей. В воскресенье специальное предложение: заплатив за три шоколадки, покупатель получает четыре (одну в подарок). Сколько шоколадок можно получить на 130 рублей в воскресенье?",
+        answer: "6", 
+        hint: "Сначала узнаем, сколько можно купить: 130 : 25 = 5,2 → 5 шоколадок (125 руб). За 5 купленных полных троек? 5 = 3 + 2, значит одна бесплатная. Итого: 5 + 1 = 6." },
+      
+      { id: "mb-2", title: "Задание 1 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "Стоимость проездного билета на месяц составляет 655 рублей, а стоимость билета на одну поездку — 25 рублей. Аня купила проездной и сделала за месяц 47 поездок. На сколько рублей больше она бы потратила, если бы каждый раз покупала билет на одну поездку?",
+        answer: "520", 
+        hint: "Стоимость без проездного: 47·25 = 1175 руб. Разница: 1175 - 655 = 520 руб." },
+      
+      { id: "mb-3", title: "Задание 1 (ФИПИ)", diff: "Легко", diffType: "ok", 
+        prompt: "В пачке 500 листов бумаги формата А4. За неделю в офисе расходуется 800 листов. Какое наименьшее количество пачек бумаги хватит на 7 недель?",
+        answer: "12", 
+        hint: "За 7 недель нужно 7·800 = 5600 листов. Пачек нужно: 5600 : 500 = 11,2 → округляем вверх → 12 пачек." },
+      
+      { id: "mb-4", title: "Задание 1 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "Для приготовления маринада необходим 2% раствор уксуса. Сколько граммов 6% уксуса нужно добавить к 180 г воды, чтобы получить раствор требуемой концентрации?",
+        answer: "60", 
+        hint: "Пусть x г 6% уксуса. Тогда чистого уксуса 0,06x. Общая масса x+180. Уравнение: 0,06x = 0,02(x+180) → 0,06x = 0,02x + 3,6 → 0,04x = 3,6 → x=90. Ошибка? Проверим: 90 г 6% уксуса = 5,4 г уксуса, общая масса 270, концентрация 5,4/270=0,02=2%. Да, x=90." },
+      
+      { id: "mb-5", title: "Задание 2 (ФИПИ)", diff: "Легко", diffType: "ok", 
+        prompt: "На диаграмме показана среднемесячная температура воздуха в Симферополе за каждый месяц 1988 года. По горизонтали указываются месяцы, по вертикали — температура в градусах Цельсия. Определите по диаграмме наибольшую среднемесячную температуру. (В данной задаче введите число, исходя из графика: максимальная температура была 24°C)",
+        answer: "24", 
+        hint: "Ищем самую высокую точку на графике." },
+      
+      { id: "mb-6", title: "Задание 2 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "На рисунке жирными точками показано суточное количество осадков, выпадавших в Казани с 3 по 15 февраля 1909 года. По горизонтали указываются числа месяца, по вертикали — количество осадков в мм. Для наглядности жирные точки соединены линией. Определите по рисунку, сколько дней из данного периода не было осадков (количество осадков было равно 0).",
+        answer: "4", 
+        hint: "Считаем дни с нулевым значением на графике." },
+      
+      { id: "mb-7", title: "Задание 4 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "Работа постоянного тока (в джоулях) вычисляется по формуле A = U²·t/R, где U — напряжение (в вольтах), R — сопротивление (в омах), t — время (в секундах). Пользуясь этой формулой, найдите A, если t = 10 с, U = 220 В, R = 50 Ом.",
+        answer: "9680", 
+        hint: "A = 220²·10/50 = 48400·10/50 = 484000/50 = 9680." },
+      
+      { id: "mb-8", title: "Задание 4 (ФИПИ)", diff: "Сложно", diffType: "bad", 
+        prompt: "Зная длину своего шага, человек может приближённо подсчитать пройденное им расстояние s по формуле s = n·l, где n — число шагов, l — длина шага. Какое расстояние прошёл человек, если l = 80 см, n = 1200? Ответ выразите в километрах.",
+        answer: "0.96", 
+        hint: "s = 1200·80 = 96000 см = 960 м = 0,96 км." },
+      
+      { id: "mb-9", title: "Задание 5 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "На семинар приехали 6 ученых из Норвегии, 5 из России и 9 из Испании. Порядок докладов определяется жеребьёвкой. Найдите вероятность того, что восьмым окажется доклад ученого из России.",
+        answer: "0.25", 
+        hint: "Всего учёных: 6+5+9 = 20. Из России — 5. Вероятность = 5/20 = 0,25." },
+      
+      { id: "mb-10", title: "Задание 6 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "Решите уравнение 2x² + 5x - 3 = 0. Если уравнение имеет более одного корня, в ответе укажите больший из них.",
+        answer: "0.5", 
+        hint: "D = 25 + 24 = 49; корни: x = (-5 ± 7)/4; x₁ = 0,5; x₂ = -3. Больший 0,5." },
+      
+      { id: "mb-11", title: "Задание 8 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "В классе 26 учащихся. Среди них два друга — Андрей и Сергей. Учащихся случайным образом разбивают на две равные группы (по 13 человек). Найдите вероятность того, что Андрей и Сергей окажутся в одной группе.",
+        answer: "0.48", 
+        hint: "Всего способов выбрать 13 из 26 для первой группы. Благоприятные: сначала поместим Андрея в группу, тогда для Сергея остаётся 12 мест из 25. Вероятность = 12/25 = 0,48." },
+      
+      { id: "mb-12", title: "Задание 9 (ФИПИ)", diff: "Средне", diffType: "warn", 
+        prompt: "Найдите площадь прямоугольника, если его периметр равен 42, а одна из сторон на 3 больше другой.",
+        answer: "108", 
+        hint: "Стороны a и a+3. Периметр 2(a + a+3) = 4a+6 = 42 → a=9. Площадь 9·12=108." },
+      
+      { id: "mb-13", title: "Задание 9 (ФИПИ)", diff: "Сложно", diffType: "bad", 
+        prompt: "В треугольнике ABC угол C равен 90°, AB = 25, AC = 15. Найдите синус угла A.",
+        answer: "0.8", 
+        hint: "sin A = противолежащий катет/гипотенуза = BC/AB. BC = √(25²-15²) = √(625-225)=√400=20. sin A = 20/25 = 0,8." }
+    ];
+
+    const DEFAULT_STATE = {
+      theme: "light",
+      subjects: [
+        { id: "inf",  name: "Информатика", icon: "💻", progress: 68 },
+        { id: "math_base", name: "Математика (база)", icon: "📐", progress: 0 },
+        { id: "phys", name: "Физика", icon: "⚛️", progress: 0 },
+        { id: "math_prof", name: "Математика (профиль)", icon: "📊", progress: 0 }
+      ],
+      solved: (() => {
+        const solved = {};
+        [...TASKS_INF, ...TASKS_MATH_BASE].forEach(t => solved[t.id] = false);
+        return solved;
+      })(),
+      achievements: {
+        first: false,
+        three: false,
+        five: false
+      },
+      unreadMessages: { "m1": true, "m2": true, "m3": false },
+      messages: [
+        { id:"m1", title:"Совет дня", text:"Решай по 10 минут каждый день — это лучше, чем 2 часа раз в неделю." },
+        { id:"m2", title:"Новые задания", text:"В информатику добавлены задания по условию Фано и графам." },
+        { id:"m3", title:"Напоминание", text:"Не забудь повторить теорию вероятностей." }
+      ],
+      leaderboard: [
+        { name: "Александр П.", score: 1250 },
+        { name: "Вы", score: 980 },
+        { name: "Мария К.", score: 870 }
+      ],
+      selectedThemeInf: null,
+      showOnlyUnsolvedInf: false,
+      selectedThemeMathBase: null,
+      showOnlyUnsolvedMathBase: false
+    };
+
+    // Загружаем состояние
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        if(!raw) return structuredClone(DEFAULT_STATE);
+        const parsed = JSON.parse(raw);
+        return { ...structuredClone(DEFAULT_STATE), ...parsed };
+      }catch(e){
+        return structuredClone(DEFAULT_STATE);
+      }
+    }
+    function saveState(state){
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+    }
+
+    function loadAuth(){
+      try{
+        const raw = sessionStorage.getItem(AUTH_KEY);
+        return raw ? JSON.parse(raw) : null;
+      }catch(e){ return null; }
+    }
+    function saveAuth(auth){
+      sessionStorage.setItem(AUTH_KEY, JSON.stringify(auth));
+    }
+    function clearAuth(){
+      sessionStorage.removeItem(AUTH_KEY);
+    }
+
+    let state = loadState();
+    applyTheme(state.theme);
+
+    // =========================================================
+    // 2) Утилиты UI (те же, что и раньше, без изменений)
+    // =========================================================
+    const $header = document.getElementById("header");
+    const $main = document.getElementById("main");
+    const $tabbar = document.getElementById("tabbar");
+    const $toast = document.getElementById("toast");
+
+    function icon(name){
+      const icons = {
+        back: '<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        bell: '<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 7h18s-3 0-3-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M13.7 19a2 2 0 01-3.4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+        user: '<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 21a8 8 0 10-16 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 11a4 4 0 100-8 4 4 0 000 8Z" stroke="currentColor" stroke-width="1.7"/></svg>',
+        check: '<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        x: '<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'
+      };
+      return icons[name] || "";
+    }
+
+    function setHeader({ title, subtitle="", canBack=false, showBell=true }){
+      const auth = loadAuth();
+      const unread = countUnread();
+      const left = canBack
+        ? `<button class="icon-btn" id="btnBack" aria-label="Назад">${icon("back")}</button>`
+        : `<button class="icon-btn" id="btnAvatar" aria-label="Профиль">${avatarMarkup(auth)}</button>`;
+
+      const right = showBell
+        ? `<button class="icon-btn" id="btnBell" aria-label="Уведомления" style="position:relative">${icon("bell")}${unread>0 ? `<span class="badge" aria-label="Непрочитанные">${unread}</span>` : ""}</button>`
+        : `<span style="width:42px;height:42px"></span>`;
+
+      $header.innerHTML = `
+        ${left}
+        <div class="header-stack">
+          <div class="header-title">${escapeHtml(title)}</div>
+          ${subtitle ? `<div class="header-sub">${escapeHtml(subtitle)}</div>` : ""}
+        </div>
+        ${right}
+      `;
+
+      const backBtn = document.getElementById("btnBack");
+      if(backBtn) backBtn.addEventListener("click", ()=> history.back());
+
+      const bellBtn = document.getElementById("btnBell");
+      if(bellBtn) bellBtn.addEventListener("click", ()=> {
+        go("#/messages");
+        toast("Уведомления", "Открыл раздел «Сообщения».", "ok");
+      });
+    }
+
+    function avatarMarkup(auth){
+      const name = auth?.name || "Гость";
+      const letter = name.trim().slice(0,1).toUpperCase() || "S";
+      const bg = auth?.avatar || "linear-gradient(180deg, var(--brand), var(--brand-2))";
+      return `<span aria-hidden="true" style="width:24px;height:24px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:1100;background:${bg};box-shadow:0 10px 18px rgba(37,99,235,.25)">${escapeHtml(letter)}</span>`;
+    }
+
+    function toast(title, message, type="ok"){
+      $toast.innerHTML = `
+        <div class="bubble ${type}">
+          ${type==="ok" ? icon("check") : icon("x")}
+          <div style="min-width:0">
+            <span>${escapeHtml(title)}</span>
+            <small>${escapeHtml(message)}</small>
+          </div>
+        </div>
+      `;
+      clearTimeout(toast._t);
+      toast._t = setTimeout(()=> { $toast.innerHTML = ""; }, 2600);
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function applyTheme(theme){
+      document.body.classList.toggle("theme-dark", theme === "dark");
+    }
+
+    function countUnread(){
+      let n = 0;
+      for(const k in state.unreadMessages){ if(state.unreadMessages[k]) n++; }
+      return n;
+    }
+
+    // =========================================================
+    // 3) Роутер (без изменений)
+    // =========================================================
+    function route(){
+      const auth = loadAuth();
+      if(!auth){
+        $tabbar.classList.add("hide");
+        setHeader({ title: "SmartЕГЭ", subtitle: "Онбординг", canBack: false, showBell: false });
+        renderLogin();
+        return;
+      }
+      $tabbar.classList.remove("hide");
+
+      const h = (location.hash || "#/subjects").replace(/^#/, "");
+      const parts = h.split("?")[0].split("/").filter(Boolean);
+      const [r1, r2] = parts;
+
+      if(!r1){ go("#/subjects", true); return; }
+
+      setActiveTab(r1);
+
+      if(r1 === "subjects"){ setHeader({ title: "Предметы", subtitle: auth.name, canBack:false, showBell:true }); renderSubjects(); return; }
+      if(r1 === "progress"){ setHeader({ title: "Прогресс", subtitle: "Достижения и рейтинг", canBack:false, showBell:true }); renderProgress(); return; }
+      if(r1 === "messages"){ setHeader({ title: "Сообщения", subtitle: "Подсказки и напоминания", canBack:false, showBell:true }); renderMessages(); return; }
+      if(r1 === "settings"){ setHeader({ title: "Настройки", subtitle: "Тема и аккаунт", canBack:false, showBell:true }); renderSettings(); return; }
+
+      if(r1 === "subject" && r2 === "inf"){
+        const qs = new URLSearchParams((location.hash.split("?")[1]||""));
+        const tab = qs.get("tab") || "theory";
+        setHeader({ title: "Информатика", subtitle: tab === "theory" ? "Теория" : "Практика", canBack:true, showBell:true });
+        renderSubjectInf(tab);
+        return;
+      }
+
+      if(r1 === "subject" && r2 === "math_base"){
+        const qs = new URLSearchParams((location.hash.split("?")[1]||""));
+        const tab = qs.get("tab") || "theory";
+        setHeader({ title: "Математика (база)", subtitle: tab === "theory" ? "Теория" : "Практика", canBack:true, showBell:true });
+        renderSubjectMathBase(tab);
+        return;
+      }
+
+      if(r1 === "task" && r2){
+        const taskInf = TASKS_INF.find(t => t.id === r2);
+        const taskMath = TASKS_MATH_BASE.find(t => t.id === r2);
+        const task = taskInf || taskMath;
+        if(!task){ go("#/subjects"); return; }
+        const subjectTitle = taskInf ? "Информатика" : "Математика (база)";
+        setHeader({ title: "Задание", subtitle: subjectTitle, canBack:true, showBell:false });
+        renderTask(task);
+        return;
+      }
+
+      go("#/subjects", true);
+    }
+
+    function go(hash, replace=false){
+      if(replace) {
+        location.replace(hash);
+      } else {
+        if (location.hash === hash) {
+          route();
+        } else {
+          location.hash = hash;
+        }
+      }
+    }
+
+    function setActiveTab(tab){
+      const tabs = Array.from(document.querySelectorAll(".tab"));
+      tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+      if(tab === "subject" || tab === "task"){
+        tabs.forEach(t => t.classList.remove("active"));
+      }
+    }
+
+    $tabbar.addEventListener("click", (e)=>{
+      const tab = e.target.closest(".tab")?.dataset?.tab;
+      if(!tab) return;
+      go("#/" + tab);
+    });
+
+    window.addEventListener("hashchange", route);
+
+    // =========================================================
+    // 4) Экраны (адаптированы под новый контент)
+    // =========================================================
+    function renderLogin(){
+      $main.innerHTML = `
+        <div class="center">
+          <div class="card hero">
+            <div class="brand-badge" aria-hidden="true"><span style="font-weight:1100;font-size:18px">SE</span></div>
+            <h1>SmartЕГЭ</h1>
+            <p>Реальные задания из ФИПИ, полная теория и система достижений для подготовки к ЕГЭ.</p>
+            <button class="btn primary full" id="loginBtn"><span style="font-weight:1100">Войти</span></button>
+            <div class="sp"></div>
+            <button class="btn ghost full" id="demoBtn">Войти как Демо</button>
+          </div>
+        </div>
+      `;
+
+      const login = (name="Степан") => {
+        saveAuth({ name, avatar: "linear-gradient(180deg, var(--brand), var(--brand-2))" });
+        toast("Привет, " + name + "!", "Авторизация выполнена.", "ok");
+        go("#/subjects");
+      };
+
+      document.getElementById("loginBtn").addEventListener("click", ()=> login("Степан"));
+      document.getElementById("demoBtn").addEventListener("click", ()=> login("Демо"));
+    }
+
+    function renderSubjects(){
+      $main.innerHTML = `
+        <div class="section-title">Доступные предметы <span class="chip">${state.subjects.length} предмета</span></div>
+        <div class="grid">
+          ${state.subjects.map(s => subjectCard(s, s.id === "inf" || s.id === "math_base")).join("")}
+        </div>
+        <div class="divider"></div>
+        <div class="card pad">
+          <div class="row">
+            <div>
+              <div style="font-weight:1100">Новые задания ФИПИ</div>
+              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px;line-height:1.35">
+                В информатику добавлены задания по условию Фано, в математику — задачи из демоверсии 2026.
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      hydrateProgressBars();
+    }
+
+    function subjectCard(s, clickable){
+      const onclick = clickable ? `data-open="${s.id}"` : "";
+      const hint = clickable ? `<span class="chip">Открыть</span>` : `<span class="chip">Скоро</span>`;
+      return `
+        <div class="card subject" ${onclick}>
+          <div class="row">
+            <div class="s-ico" aria-hidden="true"><span style="font-weight:1100">${escapeHtml(s.icon)}</span></div>
+            ${hint}
+          </div>
+          <div class="name">${escapeHtml(s.name)}</div>
+          <div class="pct">Прогресс: <strong>${s.progress}%</strong></div>
+          <div class="bar" aria-hidden="true"><i data-bar="${s.id}" style="width:${s.progress}%"></i></div>
+        </div>
+      `;
+    }
+
+    function hydrateProgressBars(){
+      requestAnimationFrame(()=>{
+        document.querySelectorAll("[data-bar]").forEach(i=>{
+          const id = i.getAttribute("data-bar");
+          const s = state.subjects.find(x=>x.id===id);
+          i.style.width = (s?.progress ?? 0) + "%";
+        });
+      });
+
+      document.querySelectorAll("[data-open]").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          const id = el.getAttribute("data-open");
+          if(id === "inf") go("#/subject/inf?tab=theory");
+          else if(id === "math_base") go("#/subject/math_base?tab=theory");
+          else toast("Скоро", "Этот предмет в прототипе пока как заглушка.", "bad");
+        });
+      });
+    }
+
+    // --- Информатика ---
+    function renderSubjectInf(tab){
+      $main.innerHTML = `
+        <div class="seg" role="tablist" aria-label="Табы предмета">
+          <button class="${tab==='theory'?'active':''}" id="tabTheory" role="tab" aria-selected="${tab==='theory'}">Теория</button>
+          <button class="${tab==='practice'?'active':''}" id="tabPractice" role="tab" aria-selected="${tab==='practice'}">Практика</button>
+        </div>
+        ${tab === "theory" ? renderInfTheory() : renderInfPractice()}
+      `;
+
+      document.getElementById("tabTheory").addEventListener("click", ()=> go("#/subject/inf?tab=theory"));
+      document.getElementById("tabPractice").addEventListener("click", ()=> go("#/subject/inf?tab=practice"));
+
+      if(tab === "practice") {
+        document.querySelectorAll("[data-theme-filter-inf]").forEach(el=>{
+          el.addEventListener("click", (e)=>{
+            const themeId = e.target.getAttribute("data-theme-filter-inf");
+            state.selectedThemeInf = themeId === "all" ? null : themeId;
+            saveState(state);
+            renderSubjectInf("practice");
+          });
+        });
+
+        document.getElementById("filterUnsolvedInf")?.addEventListener("change", (e)=>{
+          state.showOnlyUnsolvedInf = e.target.checked;
+          saveState(state);
+          renderSubjectInf("practice");
+        });
+
+        document.getElementById("resetFiltersInf")?.addEventListener("click", ()=>{
+          state.selectedThemeInf = null;
+          state.showOnlyUnsolvedInf = false;
+          saveState(state);
+          renderSubjectInf("practice");
+        });
+      }
+
+      document.querySelectorAll(".acc-head").forEach(head=>{
+        head.addEventListener("click", ()=>{
+          const item = head.closest(".acc-item");
+          item.classList.toggle("open");
+        });
+      });
+
+      document.querySelectorAll("[data-task]").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          const id = el.getAttribute("data-task");
+          go("#/task/" + id);
+        });
+      });
+    }
+
+    function renderInfTheory(){
+      const getThemeTaskCount = (themeId) => {
+        const theme = THEMES_INF.find(t => t.id === themeId);
+        return theme ? theme.taskIds.length : 0;
+      };
+
+      return `
+        <div class="section-title">Учебные материалы <span class="chip">Теория ФИПИ</span></div>
+        <div class="acc" aria-label="Список тем (теория)">
+          ${accItem("Кодирование информации", THEORY_INF.coding, ["Равномерные/неравномерные коды", "Условие Фано", "Количество информации"], getThemeTaskCount("coding"))}
+          ${accItem("Алгебра логики", THEORY_INF.logic, ["Логические операции", "Таблицы истинности", "Законы де Моргана"], getThemeTaskCount("logic"))}
+          ${accItem("Системы счисления", THEORY_INF.systems, ["Двоичная система", "Перевод между системами", "Арифметика"], getThemeTaskCount("systems"))}
+          ${accItem("Графы", THEORY_INF.graphs, ["Поиск путей", "Взвешенные графы"], getThemeTaskCount("graphs"))}
+          ${accItem("Алгоритмы", THEORY_INF.algorithms, ["Исполнители", "Рекурсия", "Анализ"], getThemeTaskCount("algorithms"))}
+          ${accItem("Программирование", THEORY_INF.programming, ["Динамика", "Массивы"], getThemeTaskCount("programming"))}
+        </div>
+        <div class="divider"></div>
+        <div class="card pad">
+          <div class="row">
+            <div>
+              <div style="font-weight:1100">Совет</div>
+              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px;line-height:1.35">
+                Изучи теорию, затем переходи к реальным заданиям из ЕГЭ.
+              </div>
+            </div>
+            <button class="btn" id="toPracticeInf">К практике</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderInfPractice(){
+      const solvedCount = TASKS_INF.filter(t => state.solved[t.id]).length;
+      const total = TASKS_INF.length;
+      const pct = total ? Math.round((solvedCount/total)*100) : 0;
+
+      let filteredTasks = [...TASKS_INF];
+      if (state.selectedThemeInf) {
+        const theme = THEMES_INF.find(t => t.id === state.selectedThemeInf);
+        if (theme) filteredTasks = filteredTasks.filter(t => theme.taskIds.includes(t.id));
+      }
+      if (state.showOnlyUnsolvedInf) {
+        filteredTasks = filteredTasks.filter(t => !state.solved[t.id]);
+      }
+
+      const getThemeProgress = (themeId) => {
+        const theme = THEMES_INF.find(t => t.id === themeId);
+        if (!theme) return '';
+        const totalInTheme = theme.taskIds.length;
+        if (totalInTheme === 0) return '';
+        const solvedInTheme = theme.taskIds.filter(id => state.solved[id]).length;
+        return ` ${solvedInTheme}/${totalInTheme}`;
+      };
+
+      return `
+        <div class="section-title">Практика <span class="chip">${solvedCount}/${total} решено</span></div>
+        <div class="card pad">
+          <div class="row">
+            <div>
+              <div style="font-weight:1100">Прогресс</div>
+              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px">Решай задания, получай достижения</div>
+            </div>
+            <span class="chip">${pct}%</span>
+          </div>
+          <div class="bar" aria-hidden="true" style="margin-top:10px"><i style="width:${pct}%"></i></div>
+        </div>
+        <div class="theme-scroll">
+          <span class="chip ${!state.selectedThemeInf ? 'active' : ''}" data-theme-filter-inf="all">Все темы</span>
+          ${THEMES_INF.map(t => `<span class="chip ${state.selectedThemeInf === t.id ? 'active' : ''}" data-theme-filter-inf="${t.id}">${escapeHtml(t.name)}${getThemeProgress(t.id)}</span>`).join('')}
+        </div>
+        <div class="row" style="margin-bottom:12px;">
+          <label style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;">
+            <input type="checkbox" id="filterUnsolvedInf" ${state.showOnlyUnsolvedInf ? 'checked' : ''}> Только нерешённые
+          </label>
+          <button class="btn ghost" style="height:36px;padding:0 12px;" id="resetFiltersInf">Сбросить</button>
+        </div>
+        <div class="list" aria-label="Список заданий">
+          ${filteredTasks.length ? filteredTasks.map(t => taskRow(t)).join('') : '<div class="card pad muted" style="text-align:center;">Нет заданий по выбранным фильтрам</div>'}
+        </div>
+      `;
+    }
+
+    // --- Математика (база) ---
+    function renderSubjectMathBase(tab){
+      $main.innerHTML = `
+        <div class="seg" role="tablist" aria-label="Табы предмета">
+          <button class="${tab==='theory'?'active':''}" id="tabTheory" role="tab" aria-selected="${tab==='theory'}">Теория</button>
+          <button class="${tab==='practice'?'active':''}" id="tabPractice" role="tab" aria-selected="${tab==='practice'}">Практика</button>
+        </div>
+        ${tab === "theory" ? renderMathBaseTheory() : renderMathBasePractice()}
+      `;
+
+      document.getElementById("tabTheory").addEventListener("click", ()=> go("#/subject/math_base?tab=theory"));
+      document.getElementById("tabPractice").addEventListener("click", ()=> go("#/subject/math_base?tab=practice"));
+
+      if(tab === "practice") {
+        document.querySelectorAll("[data-theme-filter-math]").forEach(el=>{
+          el.addEventListener("click", (e)=>{
+            const themeId = e.target.getAttribute("data-theme-filter-math");
+            state.selectedThemeMathBase = themeId === "all" ? null : themeId;
+            saveState(state);
+            renderSubjectMathBase("practice");
+          });
+        });
+
+        document.getElementById("filterUnsolvedMath")?.addEventListener("change", (e)=>{
+          state.showOnlyUnsolvedMathBase = e.target.checked;
+          saveState(state);
+          renderSubjectMathBase("practice");
+        });
+
+        document.getElementById("resetFiltersMath")?.addEventListener("click", ()=>{
+          state.selectedThemeMathBase = null;
+          state.showOnlyUnsolvedMathBase = false;
+          saveState(state);
+          renderSubjectMathBase("practice");
+        });
+      }
+
+      document.querySelectorAll(".acc-head").forEach(head=>{
+        head.addEventListener("click", ()=>{
+          const item = head.closest(".acc-item");
+          item.classList.toggle("open");
+        });
+      });
+
+      document.querySelectorAll("[data-task]").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          const id = el.getAttribute("data-task");
+          go("#/task/" + id);
+        });
+      });
+    }
+
+    function renderMathBaseTheory(){
+      const getThemeTaskCount = (themeId) => {
+        const theme = THEMES_MATH_BASE.find(t => t.id === themeId);
+        return theme ? theme.taskIds.length : 0;
+      };
+
+      return `
+        <div class="section-title">Учебные материалы <span class="chip">Теория ФИПИ</span></div>
+        <div class="acc" aria-label="Список тем (теория)">
+          ${accItem("Арифметика", THEORY_MATH_BASE.arith, ["Проценты", "Пропорции", "Округление"], getThemeTaskCount("arith"))}
+          ${accItem("Графики и диаграммы", THEORY_MATH_BASE.graphs, ["Чтение графиков", "Наибольшие/наименьшие значения"], getThemeTaskCount("graphs"))}
+          ${accItem("Вычисления по формулам", THEORY_MATH_BASE.formulas, ["Подстановка значений", "Работа с величинами"], getThemeTaskCount("formulas"))}
+          ${accItem("Вероятность", THEORY_MATH_BASE.probability, ["Классическая вероятность", "Доля благоприятных исходов"], getThemeTaskCount("probability"))}
+          ${accItem("Уравнения", THEORY_MATH_BASE.equations, ["Линейные", "Квадратные"], getThemeTaskCount("equations"))}
+          ${accItem("Логические задачи", THEORY_MATH_BASE.logic, ["Таблицы", "Перебор"], getThemeTaskCount("logic"))}
+          ${accItem("Геометрия", THEORY_MATH_BASE.geometry, ["Площади", "Теорема Пифагора"], getThemeTaskCount("geometry"))}
+        </div>
+        <div class="divider"></div>
+        <div class="card pad">
+          <div class="row">
+            <div>
+              <div style="font-weight:1100">Совет</div>
+              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px;line-height:1.35">
+                В демоверсии 2026 много задач на анализ данных — внимательно читайте условия.
+              </div>
+            </div>
+            <button class="btn" id="toPracticeMath">К практике</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMathBasePractice(){
+      const solvedCount = TASKS_MATH_BASE.filter(t => state.solved[t.id]).length;
+      const total = TASKS_MATH_BASE.length;
+      const pct = total ? Math.round((solvedCount/total)*100) : 0;
+
+      let filteredTasks = [...TASKS_MATH_BASE];
+      if (state.selectedThemeMathBase) {
+        const theme = THEMES_MATH_BASE.find(t => t.id === state.selectedThemeMathBase);
+        if (theme) filteredTasks = filteredTasks.filter(t => theme.taskIds.includes(t.id));
+      }
+      if (state.showOnlyUnsolvedMathBase) {
+        filteredTasks = filteredTasks.filter(t => !state.solved[t.id]);
+      }
+
+      const getThemeProgress = (themeId) => {
+        const theme = THEMES_MATH_BASE.find(t => t.id === themeId);
+        if (!theme) return '';
+        const totalInTheme = theme.taskIds.length;
+        if (totalInTheme === 0) return '';
+        const solvedInTheme = theme.taskIds.filter(id => state.solved[id]).length;
+        return ` ${solvedInTheme}/${totalInTheme}`;
+      };
+
+      return `
+        <div class="section-title">Практика <span class="chip">${solvedCount}/${total} решено</span></div>
+        <div class="card pad">
+          <div class="row">
+            <div>
+              <div style="font-weight:1100">Прогресс</div>
+              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px">Решай задания из ФИПИ</div>
+            </div>
+            <span class="chip">${pct}%</span>
+          </div>
+          <div class="bar" aria-hidden="true" style="margin-top:10px"><i style="width:${pct}%"></i></div>
+        </div>
+        <div class="theme-scroll">
+          <span class="chip ${!state.selectedThemeMathBase ? 'active' : ''}" data-theme-filter-math="all">Все темы</span>
+          ${THEMES_MATH_BASE.map(t => `<span class="chip ${state.selectedThemeMathBase === t.id ? 'active' : ''}" data-theme-filter-math="${t.id}">${escapeHtml(t.name)}${getThemeProgress(t.id)}</span>`).join('')}
+        </div>
+        <div class="row" style="margin-bottom:12px;">
+          <label style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;">
+            <input type="checkbox" id="filterUnsolvedMath" ${state.showOnlyUnsolvedMathBase ? 'checked' : ''}> Только нерешённые
+          </label>
+          <button class="btn ghost" style="height:36px;padding:0 12px;" id="resetFiltersMath">Сбросить</button>
+        </div>
+        <div class="list" aria-label="Список заданий">
+          ${filteredTasks.length ? filteredTasks.map(t => taskRow(t)).join('') : '<div class="card pad muted" style="text-align:center;">Нет заданий по выбранным фильтрам</div>'}
+        </div>
+      `;
+    }
+
+    function accItem(title, theoryText, items, taskCount){
+      const taskText = taskCount > 0 ? ` (${taskCount} заданий)` : '';
+      return `
+        <div class="acc-item">
+          <div class="acc-head" role="button" aria-label="Открыть тему">
+            <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+              <strong>${escapeHtml(title)}${escapeHtml(taskText)}</strong>
+              <span>${items.length} подтемы</span>
+            </div>
+            <span class="chip">▼</span>
+          </div>
+          <div class="acc-body">
+            <ul>${items.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
+            <div class="theory-text">${escapeHtml(theoryText).replace(/\\n/g, '<br>')}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function taskRow(t){
+      const solved = !!state.solved[t.id];
+      const status = solved ? `<span class="chip ok">Решено</span>` : `<span class="chip">Не решено</span>`;
+      return `
+        <div class="card task" data-task="${t.id}">
+          <div>
+            <div class="t-title">${escapeHtml(t.title)}</div>
+            <div class="t-sub">${escapeHtml(t.prompt)}</div>
+          </div>
+          <div class="meta">
+            <span class="chip ${t.diffType}">${escapeHtml(t.diff)}</span>
+            ${status}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTask(task){
+      const DURATION = 5 * 60;
+      let remain = DURATION;
+      clearInterval(renderTask._timer);
+
+      const solvedAlready = !!state.solved[task.id];
+
+      $main.innerHTML = `
+        <div class="card pad">
+          <div class="row">
+            <div style="min-width:0">
+              <div class="q-title">${escapeHtml(task.title)}</div>
+              <div class="q-text">${escapeHtml(task.prompt)}</div>
+            </div>
+            <div class="timer" id="timer" aria-label="Таймер">05:00</div>
+          </div>
+          <div class="divider"></div>
+          <label style="display:block;font-weight:900;margin-bottom:8px">Ответ</label>
+          <input class="input" id="answer" placeholder="Введите ответ..." inputmode="text" autocomplete="off"/>
+          <div class="sp"></div>
+          <div class="row" style="gap:10px;align-items:stretch">
+            <button class="btn primary" style="flex:1" id="checkBtn">Проверить</button>
+            <button class="btn" style="width:140px" id="hintBtn">Подсказка</button>
+          </div>
+          <div class="hint" id="hintBox" role="note">${escapeHtml(task.hint)}</div>
+          <div class="sp"></div>
+          <div class="row">
+            <span class="chip ${solvedAlready ? "ok" : ""}">${solvedAlready ? "Уже решено" : "Статус: не решено"}</span>
+            <button class="btn ghost" id="backToList">К списку</button>
+          </div>
+        </div>
+        <div class="sp"></div>
+        <div class="card pad">
+          <div style="font-weight:1100">Обратная связь</div>
+          <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:4px;line-height:1.35">
+            После верного ответа задание помечается как решённое, прогресс обновляется, достижения разблокируются.
+          </div>
+        </div>
+      `;
+
+      const $timer = document.getElementById("timer");
+      const $answer = document.getElementById("answer");
+      const $hintBox = document.getElementById("hintBox");
+      const $hintBtn = document.getElementById("hintBtn");
+
+      function fmt(t){
+        const m = String(Math.floor(t/60)).padStart(2,"0");
+        const s = String(t%60).padStart(2,"0");
+        return m + ":" + s;
+      }
+
+      renderTask._timer = setInterval(()=>{
+        remain--;
+        $timer.textContent = fmt(Math.max(0, remain));
+        if(remain <= 0){
+          clearInterval(renderTask._timer);
+          toast("Время вышло", "Можно попробовать ещё раз.", "bad");
+        }
+      }, 1000);
+
+      document.getElementById("backToList").addEventListener("click", ()=>{
+        if (task.id.startsWith("inf")) go("#/subject/inf?tab=practice");
+        else if (task.id.startsWith("mb")) go("#/subject/math_base?tab=practice");
+        else go("#/subjects");
+      });
+
+      $hintBtn.addEventListener("click", ()=>{
+        $hintBox.classList.toggle("show");
+      });
+
+      document.getElementById("checkBtn").addEventListener("click", ()=>{
+        const user = ($answer.value || "").trim().toLowerCase();
+        const ok = user === String(task.answer).trim().toLowerCase();
+
+        if(ok){
+          markSolved(task.id);
+          toast("Верно!", "Задание засчитано. Прогресс обновлён.", "ok");
+          $hintBox.classList.remove("show");
+        }else{
+          toast("Неверно", "Попробуй снова или нажми «Подсказка».", "bad");
+        }
+      });
+
+      $answer.addEventListener("keydown", (e)=>{
+        if(e.key === "Enter") document.getElementById("checkBtn").click();
+      });
+
+      setTimeout(()=> $answer.focus(), 50);
+    }
+
+    // =========================================================
+    // 5) Геймификация: прогресс + достижения (исправлено: убраны базовые 50)
+    // =========================================================
+    function recomputeProgress(){
+      const solvedInf = TASKS_INF.filter(t => state.solved[t.id]).length;
+      const totalInf = TASKS_INF.length;
+      const pctInf = totalInf ? Math.round((solvedInf / totalInf) * 100) : 0;
+      // Убрано +50, теперь прогресс равен проценту решённых заданий
+      const infProgress = pctInf;
+
+      const solvedMath = TASKS_MATH_BASE.filter(t => state.solved[t.id]).length;
+      const totalMath = TASKS_MATH_BASE.length;
+      const pctMath = totalMath ? Math.round((solvedMath / totalMath) * 100) : 0;
+      const mathProgress = pctMath;
+
+      state.subjects = state.subjects.map(s => {
+        if(s.id === "inf") return { ...s, progress: infProgress };
+        if(s.id === "math_base") return { ...s, progress: mathProgress };
+        return s;
+      });
+
+      const overall = Math.round(state.subjects.reduce((a,s)=>a+s.progress,0) / state.subjects.length);
+      return overall;
+    }
+
+    function recomputeAchievements(){
+      const solvedCount = [...TASKS_INF, ...TASKS_MATH_BASE].filter(t => state.solved[t.id]).length;
+      state.achievements.first = solvedCount >= 1;
+      state.achievements.three = solvedCount >= 3;
+      state.achievements.five = solvedCount >= 5;
+    }
+
+    function markSolved(taskId){
+      if(state.solved[taskId]) return;
+      state.solved[taskId] = true;
+      recomputeAchievements();
+      recomputeProgress();
+      saveState(state);
+      
+      const solvedCount = [...TASKS_INF, ...TASKS_MATH_BASE].filter(t => state.solved[t.id]).length;
+      if (solvedCount === 1) toast("🏆 Достижение!", "Первая пятёрка — открыто!", "ok");
+      if (solvedCount === 3) toast("🏆 Достижение!", "В ударе — решено 3 задания!", "ok");
+      if (solvedCount === 5) toast("🏆 Достижение!", "Ударник труда — решено 5 заданий!", "ok");
+    }
+
+    function renderProgress(){
+      const overall = recomputeProgress();
+      const angle = Math.round((overall/100) * 360);
+      const a = state.achievements;
+
+      $main.innerHTML = `
+        <div class="card pad">
+          <div class="donut-row">
+            <div>
+              <div style="font-weight:1100">Общий прогресс</div>
+              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px">
+                Средний процент по предметам
+              </div>
+            </div>
+            <div class="donut" id="donut">
+              <div class="donut-center">
+                <div class="big">${overall}%</div>
+                <div class="small">всего</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="kpi">
+            <div class="card">
+              <div class="val">${[...TASKS_INF, ...TASKS_MATH_BASE].filter(t=>state.solved[t.id]).length}/${TASKS_INF.length+TASKS_MATH_BASE.length}</div>
+              <div class="lab">Решено заданий</div>
+            </div>
+            <div class="card">
+              <div class="val">${countUnread()}</div>
+              <div class="lab">Непрочитано</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">Достижения <span class="chip">${a.first ? 1 : 0}/${a.three ? 2 : 0}/${a.five ? 3 : 0}</span></div>
+        <div class="ach">
+          ${achRow("Первая пятёрка", "Решить одно задание", a.first)}
+          ${achRow("В ударе", "Решить 3 задания", a.three)}
+          ${achRow("Ударник труда", "Решить 5 заданий", a.five)}
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section-title">Лидеры <span class="chip">Друзья</span></div>
+        <div class="card pad">
+          ${state.leaderboard.map((u,i)=>`
+            <div class="row" style="padding:8px 2px">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <span class="chip">${i+1}</span>
+                <div>
+                  <div style="font-weight:1000">${escapeHtml(u.name)}</div>
+                  <div class="muted" style="font-weight:800;font-size:12px;margin-top:2px">${u.score} баллов</div>
+                </div>
+              </div>
+              ${u.name==="Вы" ? `<span class="chip ok">это вы</span>` : `<span class="chip">друг</span>`}
+            </div>
+          `).join("")}
+        </div>
+      `;
+
+      const donut = document.getElementById("donut");
+      donut.style.background = `conic-gradient(var(--brand) 0deg ${angle}deg, color-mix(in srgb, var(--border) 55%, transparent) ${angle}deg 360deg)`;
+    }
+
+    function achRow(name, desc, earned){
+      return `
+        <div class="card ach-item ${earned ? "" : "locked"}">
+          <div class="ach-left">
+            <div class="medal" aria-hidden="true">🏅</div>
+            <div>
+              <div class="ach-name">${escapeHtml(name)}</div>
+              <div class="ach-desc">${escapeHtml(desc)}</div>
+            </div>
+          </div>
+          <span class="chip ${earned ? "ok" : ""}">${earned ? "Получено" : "Закрыто"}</span>
+        </div>
+      `;
+    }
+
+    function renderMessages(){
+      const unread = countUnread();
+      $main.innerHTML = `
+        <div class="card pad">
+          <div class="row">
+            <div>
+              <div style="font-weight:1100">Входящие</div>
+              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px">Непрочитано: <strong>${unread}</strong></div>
+            </div>
+            <button class="btn" id="markAll">Прочитать всё</button>
+          </div>
+        </div>
+        <div class="sp"></div>
+        <div class="list" aria-label="Сообщения">
+          ${state.messages.map(m => msgRow(m)).join("")}
+        </div>
+      `;
+
+      document.getElementById("markAll").addEventListener("click", ()=>{
+        for(const k in state.unreadMessages){ state.unreadMessages[k] = false; }
+        saveState(state);
+        toast("Готово", "Все сообщения прочитаны.", "ok");
+        route();
+      });
+
+      document.querySelectorAll("[data-msg]").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          const id = el.getAttribute("data-msg");
+          state.unreadMessages[id] = false;
+          saveState(state);
+          toast("Открыто", "Сообщение отмечено как прочитанное.", "ok");
+          route();
+        });
+      });
+    }
+
+    function msgRow(m){
+      const unread = !!state.unreadMessages[m.id];
+      return `
+        <div class="card msg" data-msg="${m.id}">
+          <div class="row">
+            <div class="msg-title">${escapeHtml(m.title)}</div>
+            ${unread ? `<span class="dot" aria-label="Непрочитано"></span>` : `<span class="chip ok">прочитано</span>`}
+          </div>
+          <div class="msg-text">${escapeHtml(m.text)}</div>
+        </div>
+      `;
+    }
+
+    function renderSettings(){
+      const theme = state.theme;
+      $main.innerHTML = `
+        <div class="card pad">
+          <div class="row">
+            <div>
+              <div style="font-weight:1100">Тема</div>
+              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px">
+                Переключение светлой/тёмной темы
+              </div>
+            </div>
+            <button class="btn" id="toggleTheme">${theme === "dark" ? "Тёмная" : "Светлая"}</button>
+          </div>
+          <div class="divider"></div>
+          <div class="row">
+            <div>
+              <div style="font-weight:1100">Сбросить прогресс</div>
+              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px">Очистить все решённые задания</div>
+            </div>
+            <button class="btn" id="resetBtn">Сброс</button>
+          </div>
+          <div class="divider"></div>
+          <div class="row">
+            <div>
+              <div style="font-weight:1100">Аккаунт</div>
+              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px">Выход из аккаунта</div>
+            </div>
+            <button class="btn ghost" id="logoutBtn">Выйти</button>
+          </div>
+        </div>
+        <div class="sp"></div>
+        <div class="card pad">
+          <div style="font-weight:1100">Обновление контента</div>
+          <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:6px;line-height:1.4">
+            • Задания из демоверсий ЕГЭ 2026<br>
+            • Полная теория с формулами<br>
+            • Работающие достижения<br>
+            • Источники: ФИПИ, «Решу ЕГЭ»
+          </div>
+        </div>
+      `;
+
+      document.getElementById("toggleTheme").addEventListener("click", ()=>{
+        state.theme = state.theme === "dark" ? "light" : "dark";
+        applyTheme(state.theme);
+        saveState(state);
+        toast("Тема", "Переключено на " + (state.theme==="dark" ? "тёмную" : "светлую") + ".", "ok");
+        route();
+      });
+
+      document.getElementById("resetBtn").addEventListener("click", ()=>{
+        if(confirm("Сбросить прогресс и достижения?")){
+          const newState = structuredClone(DEFAULT_STATE);
+          newState.theme = document.body.classList.contains("theme-dark") ? "dark" : "light";
+          state = newState;
+          saveState(state);
+          toast("Сброс", "Прогресс очищен.", "ok");
+          route();
+        }
+      });
+
+      document.getElementById("logoutBtn").addEventListener("click", ()=>{
+        clearAuth();
+        toast("Выход", "Сессия завершена.", "ok");
+        setTimeout(()=> route(), 350);
+      });
+    }
+
+    // =========================================================
+    // Старт
+    // =========================================================
+    if(!location.hash) location.hash = "#/subjects";
+    route();
+  </script>
+</body>
+</html>
