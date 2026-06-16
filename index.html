@@ -1005,7 +1005,7 @@
         hint: "Задача на динамическое программирование. Количество путей до 10 и от 10 до 20, перемножить." }
     ];
 
-    // ---------- НОВЫЙ БЛОК: Генераторы заданий для тренировки (5 типов на тему) ----------
+    // ---------- НОВЫЙ БЛОК: Генераторы заданий для тренировки (более 50 вариантов) ----------
     const TRAINING_TOPICS = [
       { id: "systems", name: "Системы счисления" },
       { id: "coding", name: "Кодирование информации" },
@@ -1017,8 +1017,9 @@
       { id: "programming", name: "Программирование" }
     ];
 
+    // Расширенные генераторы (каждая тема генерирует много разных типов)
     function generateSystemsTask() {
-      const type = Math.floor(Math.random() * 5);
+      const type = Math.floor(Math.random() * 10);
       if (type === 0) {
         let num = Math.floor(Math.random() * 200) + 1;
         return { text: `Переведите ${num} из десятичной в двоичную.`, answer: num.toString(2), explanation: `${num}₁₀ = ${num.toString(2)}₂` };
@@ -1037,15 +1038,32 @@
         let num = Math.floor(Math.random() * 255) + 1;
         let ones = num.toString(2).split('1').length-1;
         return { text: `Сколько единиц в двоичной записи ${num}?`, answer: String(ones), explanation: `${num}₁₀ = ${num.toString(2)}₂ → единиц: ${ones}` };
-      } else {
+      } else if (type === 4) {
         let base = 3 + Math.floor(Math.random() * 5);
         let num = base*base + Math.floor(Math.random()*(base*base*2));
         return { text: `Найдите основание системы, в которой число ${num} трёхзначно.`, answer: String(base), explanation: `p² ≤ ${num} < p³ → p=${base}` };
+      } else if (type === 5) {
+        let a = Math.floor(Math.random()*15)+2;
+        let b = Math.floor(Math.random()*15)+2;
+        let sum = a+b;
+        return { text: `Сложите двоичные числа ${a.toString(2)}₂ и ${b.toString(2)}₂. Ответ дайте в двоичной системе.`, answer: sum.toString(2), explanation: `${a}₁₀ + ${b}₁₀ = ${sum}₁₀ = ${sum.toString(2)}₂` };
+      } else if (type === 6) {
+        let a = Math.floor(Math.random()*15)+2;
+        let b = Math.floor(Math.random()*15)+2;
+        let prod = a*b;
+        return { text: `Умножьте двоичные числа ${a.toString(2)}₂ и ${b.toString(2)}₂. Ответ дайте в двоичной системе.`, answer: prod.toString(2), explanation: `${a}₁₀ * ${b}₁₀ = ${prod}₁₀ = ${prod.toString(2)}₂` };
+      } else if (type === 7) {
+        let hex = Math.floor(Math.random()*255).toString(16).toUpperCase();
+        return { text: `Переведите шестнадцатеричное число ${hex}₁₆ в десятичную систему.`, answer: String(parseInt(hex,16)), explanation: `${hex}₁₆ = ${parseInt(hex,16)}₁₀` };
+      } else {
+        let num = Math.floor(Math.random()*100)+1;
+        let oct = num.toString(8);
+        return { text: `Переведите ${num}₁₀ в восьмеричную.`, answer: oct, explanation: `${num}₁₀ = ${oct}₈` };
       }
     }
 
     function generateCodingTask() {
-      const type = Math.floor(Math.random() * 4);
+      const type = Math.floor(Math.random() * 8);
       if (type === 0) {
         let bits = 5 + Math.floor(Math.random()*4);
         return { text: `Сколько различных сообщений можно закодировать ${bits} битами?`, answer: String(1<<bits), explanation: `2^${bits} = ${1<<bits}` };
@@ -1054,24 +1072,53 @@
         return { text: `Файл размером ${volume} Кбайт передан за 10 с. Найдите скорость в Кбит/с.`, answer: String(volume*8/10), explanation: `${volume} Кбайт = ${volume*8} Кбит, /10с = ${volume*8/10} Кбит/с` };
       } else if (type === 2) {
         return { text: `Коды: А=0, Б=10, В=110. Удовлетворяет ли код условию Фано? (да/нет)`, answer: "да", explanation: "Код префиксный, ни одно слово не является началом другого." };
-      } else {
+      } else if (type === 3) {
         return { text: `Сколько байт в 2^20 бит?`, answer: "131072", explanation: "2^20 бит = 1 048 576 бит = 131 072 байта." };
+      } else if (type === 4) {
+        let n = Math.floor(Math.random()*10)+2;
+        return { text: `Алфавит содержит ${n} символов. Сколько бит нужно для кодирования одного символа?`, answer: String(Math.ceil(Math.log2(n))), explanation: `Нужно найти минимальное k такое, что 2^k >= ${n}. k = ${Math.ceil(Math.log2(n))}` };
+      } else if (type === 5) {
+        let vol = Math.floor(Math.random()*100)+10;
+        let time = Math.floor(Math.random()*10)+5;
+        let speed = vol/time;
+        return { text: `Файл размером ${vol} Мбайт передан за ${time} с. Найдите скорость в Мбит/с.`, answer: String(speed*8), explanation: `Скорость = ${vol}/${time} Мбайт/с = ${speed} Мбайт/с = ${speed*8} Мбит/с` };
+      } else if (type === 6) {
+        return { text: `Какое минимальное количество бит потребуется для кодирования 1000 различных сообщений?`, answer: "10", explanation: "2^9=512 < 1000 ≤ 2^10=1024 → нужно 10 бит." };
+      } else {
+        let size = Math.floor(Math.random()*100)+1;
+        return { text: `Сколько байт в ${size} Кбайт?`, answer: String(size*1024), explanation: `${size} Кбайт = ${size}*1024 = ${size*1024} байт` };
       }
     }
 
     function generateLogicTask() {
-      const type = Math.floor(Math.random() * 3);
+      const type = Math.floor(Math.random() * 6);
       if (type === 0) {
-        return { text: `Вычислите (x ∧ ¬y) ∨ (z ∧ y) при x=1,y=0,z=1.`, answer: "1", explanation: "1∧1=1, остальное 0 → 1." };
+        let x = Math.round(Math.random());
+        let y = Math.round(Math.random());
+        let z = Math.round(Math.random());
+        let result = (x && !y) || (z && y) ? 1 : 0;
+        return { text: `Вычислите (x ∧ ¬y) ∨ (z ∧ y) при x=${x}, y=${y}, z=${z}.`, answer: String(result), explanation: `(${x} ∧ ¬${y}) ∨ (${z} ∧ ${y}) = ${result}` };
       } else if (type === 1) {
         return { text: `Упростите ¬(A ∨ B) по законам де Моргана.`, answer: "¬A ∧ ¬B", explanation: "¬(A∨B) = ¬A∧¬B." };
-      } else {
+      } else if (type === 2) {
         return { text: `Для какого A выражение (x≤9 → x²≤A) ∧ (y²≤A → y≤9) истинно при всех целых x,y?`, answer: "81", explanation: "A=9²=81." };
+      } else if (type === 3) {
+        let a = Math.round(Math.random());
+        let b = Math.round(Math.random());
+        let imp = !a || b ? 1 : 0;
+        return { text: `Вычислите импликацию A → B при A=${a}, B=${b}.`, answer: String(imp), explanation: `A→B = ¬A∨B = ${imp}` };
+      } else if (type === 4) {
+        let a = Math.round(Math.random());
+        let b = Math.round(Math.random());
+        let eq = (a===b) ? 1 : 0;
+        return { text: `Вычислите эквиваленцию A ∼ B при A=${a}, B=${b}.`, answer: String(eq), explanation: `A∼B = (A∧B)∨(¬A∧¬B) = ${eq}` };
+      } else {
+        return { text: `Упростите ¬(A ∧ ¬B) ∨ B.`, answer: "1", explanation: "¬(A∧¬B)∨B = ¬A∨B∨B = 1 (тавтология)." };
       }
     }
 
     function generateCombinatoricsTask() {
-      const type = Math.floor(Math.random() * 3);
+      const type = Math.floor(Math.random() * 6);
       if (type === 0) {
         let n = 3 + Math.floor(Math.random()*4);
         return { text: `Сколько слов длины ${n} из букв {А,Б,В} с повторениями?`, answer: String(3**n), explanation: `3^${n} = ${3**n}` };
@@ -1079,16 +1126,29 @@
         let n = 4 + Math.floor(Math.random()*3);
         let fact = 1; for(let i=2;i<=n;i++) fact*=i;
         return { text: `Сколько перестановок из ${n} различных элементов?`, answer: String(fact), explanation: `${n}! = ${fact}` };
-      } else {
+      } else if (type === 2) {
         let n = 5 + Math.floor(Math.random()*3);
         let k = 2 + Math.floor(Math.random()*3);
         let c = 1; for(let i=1;i<=k;i++) c = c*(n-k+i)/i;
         return { text: `Сколько способов выбрать ${k} элементов из ${n} (без учёта порядка)?`, answer: String(c), explanation: `C(${n},${k}) = ${c}` };
+      } else if (type === 3) {
+        let n = 4 + Math.floor(Math.random()*3);
+        let k = 2 + Math.floor(Math.random()*3);
+        let a = 1; for(let i=n-k+1;i<=n;i++) a*=i;
+        return { text: `Сколько размещений из ${n} по ${k} (с учётом порядка)?`, answer: String(a), explanation: `A(${n},${k}) = ${a}` };
+      } else if (type === 4) {
+        let n = 3 + Math.floor(Math.random()*3);
+        let total = n**n;
+        return { text: `Сколько слов длины ${n} из алфавита из ${n} букв?`, answer: String(total), explanation: `${n}^${n} = ${total}` };
+      } else {
+        let n = 5 + Math.floor(Math.random()*4);
+        let fact = 1; for(let i=2;i<=n;i++) fact*=i;
+        return { text: `Сколько перестановок букв в слове из ${n} различных букв?`, answer: String(fact), explanation: `${n}! = ${fact}` };
       }
     }
 
     function generateAlgorithmsTask() {
-      const type = Math.floor(Math.random() * 3);
+      const type = Math.floor(Math.random() * 8);
       if (type === 0) {
         let n = 5 + Math.floor(Math.random()*6);
         let f = (n)=> n<=2 ? 1 : f(n-1)+f(n-2);
@@ -1098,28 +1158,69 @@
         let b = a+Math.floor(Math.random()*5)+1;
         let s = (a+b)*(b-a+1)/2;
         return { text: `Чему равна сумма чисел от ${a} до ${b}?`, answer: String(s), explanation: `Сумма арифметической прогрессии = ${s}` };
-      } else {
+      } else if (type === 2) {
         return { text: `Исполнитель Чертёжник: повтори 5 [вперёд 10, направо 60]. Какая фигура получится?`, answer: "пятиугольник", explanation: "5 повторов по 60° = 300°, незамкнутая ломаная, но обычно ответ 'пятиугольник'." };
+      } else if (type === 3) {
+        let n = Math.floor(Math.random()*10)+2;
+        let sum = n*(n+1)/2;
+        return { text: `Чему равна сумма первых ${n} натуральных чисел?`, answer: String(sum), explanation: `Сумма = ${n}*(${n}+1)/2 = ${sum}` };
+      } else if (type === 4) {
+        let n = Math.floor(Math.random()*6)+3;
+        let fact = 1; for(let i=2;i<=n;i++) fact*=i;
+        return { text: `Чему равен ${n}!?`, answer: String(fact), explanation: `${n}! = ${fact}` };
+      } else if (type === 5) {
+        let a = Math.floor(Math.random()*10)+1;
+        let b = Math.floor(Math.random()*10)+1;
+        return { text: `Дано: x=${a}, y=${b}. Чему станет равно x после выполнения x = x + y; y = x - y; x = x - y?`, answer: String(b), explanation: "Обмен значений: x станет равно исходному y." };
+      } else if (type === 6) {
+        let n = Math.floor(Math.random()*5)+3;
+        let pow2 = 1<<n;
+        return { text: `Чему равно 2^${n}?`, answer: String(pow2), explanation: `2^${n} = ${pow2}` };
+      } else {
+        let n = Math.floor(Math.random()*5)+3;
+        let sum = 0; for(let i=1;i<=n;i++) sum+=i*i;
+        return { text: `Чему равна сумма квадратов чисел от 1 до ${n}?`, answer: String(sum), explanation: `Сумма квадратов = ${sum}` };
       }
     }
 
     function generateGraphsTask() {
-      const type = Math.floor(Math.random() * 2);
+      const type = Math.floor(Math.random() * 5);
       if (type === 0) {
         return { text: `Сколько путей из A в D в графе: A→B, A→C, B→D, C→D?`, answer: "2", explanation: "A→B→D и A→C→D." };
-      } else {
+      } else if (type === 1) {
         return { text: `Сколько рёбер в полном графе с 4 вершинами?`, answer: "6", explanation: "C(4,2) = 6." };
+      } else if (type === 2) {
+        let n = 3+Math.floor(Math.random()*4);
+        let edges = n*(n-1)/2;
+        return { text: `Сколько рёбер в полном графе с ${n} вершинами?`, answer: String(edges), explanation: `C(${n},2) = ${edges}` };
+      } else if (type === 3) {
+        return { text: `В графе 5 вершин, степени вершин: 2,3,3,2,2. Сколько рёбер в графе?`, answer: "6", explanation: "Сумма степеней = 2+3+3+2+2=12, рёбер = 12/2=6." };
+      } else {
+        return { text: `Сколько путей из A в B в графе: A-B (прямое), A-C-B, A-D-B?`, answer: "3", explanation: "Прямой A→B, через C и через D." };
       }
     }
 
     function generateGamesTask() {
-      let stones = 10 + Math.floor(Math.random()*20);
-      let winner = stones % 4 === 0 ? "второй" : "первый";
-      return { text: `${stones} камней, за ход 1-3. Кто выигрывает при правильной игре? (первый/второй)`, answer: winner, explanation: winner==="первый" ? "Не кратно 4" : "Кратно 4" };
+      const type = Math.floor(Math.random() * 4);
+      if (type === 0) {
+        let stones = 10 + Math.floor(Math.random()*20);
+        let winner = stones % 4 === 0 ? "второй" : "первый";
+        return { text: `${stones} камней, за ход 1-3. Кто выигрывает при правильной игре? (первый/второй)`, answer: winner, explanation: winner==="первый" ? "Не кратно 4" : "Кратно 4" };
+      } else if (type === 1) {
+        let stones = 8 + Math.floor(Math.random()*15);
+        let winner = stones % 3 === 0 ? "второй" : "первый";
+        return { text: `${stones} камней, за ход 1-2. Кто выигрывает? (первый/второй)`, answer: winner, explanation: winner==="первый" ? "Не кратно 3" : "Кратно 3" };
+      } else if (type === 2) {
+        return { text: `В игре 10 камней, можно взять 1,2,3. Каким должен быть первый ход для победы?`, answer: "2", explanation: "Нужно оставить противнику кратное 4 число камней. 10-2=8, кратно 4." };
+      } else {
+        let stones = 5 + Math.floor(Math.random()*10);
+        let winner = stones % 2 === 0 ? "второй" : "первый";
+        return { text: `${stones} камней, за ход 1-2. Кто выигрывает? (первый/второй)`, answer: winner, explanation: winner==="первый" ? "Не кратно 3" : "Кратно 3" };
+      }
     }
 
     function generateProgrammingTask() {
-      const type = Math.floor(Math.random() * 3);
+      const type = Math.floor(Math.random() * 6);
       if (type === 0) {
         let a = Math.floor(Math.random()*10)+1;
         let b = a+Math.floor(Math.random()*5)+1;
@@ -1129,8 +1230,18 @@
         let arr = [1,2,3,4,5];
         let s = arr.reduce((a,b)=>a+b,0);
         return { text: `Чему равна сумма элементов массива [1,2,3,4,5]?`, answer: "15", explanation: "1+2+3+4+5=15" };
-      } else {
+      } else if (type === 2) {
         return { text: `Что выведет программа: a=5; while(a>0){ print(a); a--; }`, answer: "5 4 3 2 1", explanation: "Цикл выводит числа от 5 до 1." };
+      } else if (type === 3) {
+        let arr = [2,4,6,8,10];
+        let sum = arr.reduce((a,b)=>a+b,0);
+        return { text: `Чему равна сумма элементов массива ${JSON.stringify(arr)}?`, answer: String(sum), explanation: `Сумма = ${sum}` };
+      } else if (type === 4) {
+        let n = Math.floor(Math.random()*5)+3;
+        let prod = 1; for(let i=1;i<=n;i++) prod*=i;
+        return { text: `Чему равно произведение чисел от 1 до ${n}?`, answer: String(prod), explanation: `Произведение = ${prod}` };
+      } else {
+        return { text: `В программе: a=2; b=3; a=a+b; b=a-b; a=a-b; Чему равны a и b?`, answer: "a=3 b=2", explanation: "Обмен значений." };
       }
     }
 
@@ -1715,6 +1826,7 @@
       saveState(state);
     }
 
+    // ---------- ОБНОВЛЁННЫЙ renderTask с объяснением ----------
     function renderTask(task){
       const DURATION = 5 * 60;
       let remain = DURATION;
@@ -1746,6 +1858,11 @@
           </div>
           <div class="hint" id="hintBox" role="note">${escapeHtml(task.hint)}</div>
           <div class="sp"></div>
+          <!-- Блок для подробного объяснения -->
+          <div id="explanationBox" style="display:none; margin-top:10px; padding:12px; border-radius:18px; border:2px solid var(--brand); background:color-mix(in srgb, var(--brand) 8%, var(--surface));">
+            <div style="font-weight:900; margin-bottom:6px;">📘 Объяснение:</div>
+            <div id="explanationText" style="font-weight:700; line-height:1.5;"></div>
+          </div>
           <div class="row">
             <span class="chip ${solvedAlready ? "ok" : ""}">${solvedAlready ? "Уже решено" : "Статус: не решено"}</span>
             <button class="btn ghost" id="backToList">К списку</button>
@@ -1764,6 +1881,8 @@
       const $answer = document.getElementById("answer");
       const $hintBox = document.getElementById("hintBox");
       const $hintBtn = document.getElementById("hintBtn");
+      const $explanationBox = document.getElementById("explanationBox");
+      const $explanationText = document.getElementById("explanationText");
 
       function fmt(t){
         const m = String(Math.floor(t/60)).padStart(2,"0");
@@ -1801,6 +1920,13 @@
 
         $answer.classList.remove("input-error");
 
+        // Показываем объяснение всегда
+        $explanationBox.style.display = "block";
+        $explanationText.innerHTML = `
+          <p><strong>Правильный ответ:</strong> ${escapeHtml(task.answer)}</p>
+          <p>${escapeHtml(task.hint)}</p>
+        `;
+
         if(user === correct){
           markSolved(task.id);
           toast("Верно!", "Задание засчитано. Прогресс обновлён.", "ok");
@@ -1826,7 +1952,7 @@
       setTimeout(()=> $answer.focus(), 50);
     }
 
-    // --- Экзамен (только информатика) ---
+    // --- Экзамен (только информатика) с улучшенным результатом ---
     function renderExam() {
       $main.innerHTML = `
         <div class="card pad">
@@ -1973,6 +2099,7 @@
       return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     }
 
+    // ---------- ОБНОВЛЁННЫЙ finishExam с сохранением подробных результатов ----------
     function finishExam() {
       if (!state.examMode) return;
       const { subjectId, tasks, answers } = state.examMode;
@@ -1985,6 +2112,7 @@
           task,
           userAnswer: answers[idx] || '(нет ответа)',
           correct: task ? task.answer : '',
+          hint: task ? task.hint : '',
           isCorrect
         };
       });
@@ -1995,17 +2123,50 @@
       go("#/exam/result");
     }
 
+    // ---------- ОБНОВЛЁННЫЙ renderExamResult с разбором и баллами ----------
     function renderExamResult() {
       const results = state.examResults || [];
       const correctCount = results.filter(r => r.isCorrect).length;
+      const total = results.length;
+      const percent = total ? Math.round((correctCount/total)*100) : 0;
+      // Примерная шкала перевода (для информатики)
+      let score = 0;
+      if (total <= 10) {
+        // максимум 10 заданий, пересчёт в 100-балльную шкалу
+        const raw = correctCount;
+        if (raw === 0) score = 0;
+        else if (raw === 1) score = 14;
+        else if (raw === 2) score = 27;
+        else if (raw === 3) score = 39;
+        else if (raw === 4) score = 51;
+        else if (raw === 5) score = 60;
+        else if (raw === 6) score = 68;
+        else if (raw === 7) score = 75;
+        else if (raw === 8) score = 82;
+        else if (raw === 9) score = 90;
+        else if (raw === 10) score = 100;
+      } else {
+        // для большего числа заданий можно сделать пропорцию
+        score = Math.round((correctCount/total)*100);
+      }
+
       $main.innerHTML = `
         <div class="card pad">
           <div style="font-weight:1100; margin-bottom:8px;">Результаты экзамена</div>
           <div class="row">
             <span>Правильных ответов:</span>
-            <span class="chip ok">${correctCount}/${results.length}</span>
+            <span class="chip ok">${correctCount}/${total}</span>
+          </div>
+          <div class="row">
+            <span>Процент:</span>
+            <span class="chip">${percent}%</span>
+          </div>
+          <div class="row">
+            <span>Первичный балл:</span>
+            <span class="chip">${score} (по шкале ЕГЭ)</span>
           </div>
           <div class="divider"></div>
+          <div style="font-weight:900; margin:10px 0;">Разбор заданий:</div>
           <div class="list" style="margin-top:12px;">
             ${results.map((r, idx) => `
               <div class="card" style="padding:12px;">
@@ -2013,6 +2174,9 @@
                 <div class="small muted">Ваш ответ: ${escapeHtml(r.userAnswer)}</div>
                 <div class="small muted">Правильный: ${escapeHtml(r.correct)}</div>
                 <div class="chip ${r.isCorrect ? 'ok' : 'bad'}" style="margin-top:6px;">${r.isCorrect ? 'Верно' : 'Неверно'}</div>
+                <div style="margin-top:8px; padding:8px; background:color-mix(in srgb, var(--brand) 8%, var(--surface)); border-radius:12px; font-weight:700; font-size:13px;">
+                  <strong>Объяснение:</strong> ${escapeHtml(r.hint)}
+                </div>
               </div>
             `).join('')}
           </div>
@@ -2057,18 +2221,42 @@
       if (solvedCount === 5) toast("🏆 Достижение!", "Ударник труда — решено 5 заданий!", "ok");
     }
 
+    // ---------- ОБНОВЛЁННЫЙ renderProgress с рекомендациями и планом ----------
     function renderProgress(){
       const overall = recomputeProgress();
       const angle = Math.round((overall/100) * 360);
       const a = state.achievements;
       const solvedCount = TASKS_INF.filter(t => state.solved[t.id]).length;
 
+      // Статистика по темам
       const themeStatsInf = THEMES_INF.map(theme => {
         const total = theme.taskIds.length;
         const solved = theme.taskIds.filter(id => state.solved[id]).length;
         const percent = total ? Math.round(solved/total*100) : 0;
         return { name: theme.name, solved, total, percent };
       });
+
+      // Рекомендации: темы с процентом < 60
+      const weakThemes = themeStatsInf.filter(t => t.percent < 60 && t.total > 0);
+      let recText = "Вы отлично справляетесь! Продолжайте в том же духе.";
+      if (weakThemes.length) {
+        recText = "Вам стоит повторить: " + weakThemes.map(t => t.name).join(", ") + ".";
+      }
+
+      // План подготовки (после 100 решённых)
+      let planText = "";
+      if (solvedCount >= 5) { // для демонстрации ставим 5, в реальности 100
+        const topThemes = themeStatsInf.sort((a,b) => a.percent - b.percent).slice(0, 2);
+        planText = `
+          <div style="margin-top:16px; padding:12px; border-radius:var(--radius-lg); background:color-mix(in srgb, var(--success) 10%, var(--surface)); border:1px solid color-mix(in srgb, var(--success) 20%, var(--border));">
+            <strong style="font-size:15px;">📋 План подготовки для 80+ баллов</strong>
+            <p style="margin:8px 0 0; font-weight:700; color:var(--muted);">
+              Рекомендуем усиленно повторить: ${topThemes.map(t => t.name).join(", ")}.
+              <br>Сосредоточьтесь на заданиях этих тем, чтобы подтянуть слабые места.
+            </p>
+          </div>
+        `;
+      }
 
       let nextGoalText = "";
       if (solvedCount < 1) {
@@ -2135,6 +2323,17 @@
             </div>
           `).join('')}
         </div>
+
+        <div class="divider"></div>
+
+        <!-- Рекомендации -->
+        <div class="card pad" style="background:color-mix(in srgb, var(--brand) 8%, var(--surface)); border-color:color-mix(in srgb, var(--brand) 20%, var(--border));">
+          <div style="font-weight:1100;">💡 Рекомендации</div>
+          <div style="font-weight:700; margin-top:6px; color:var(--muted);">${recText}</div>
+        </div>
+
+        <!-- План подготовки -->
+        ${planText}
 
         <div class="divider"></div>
 
@@ -2293,7 +2492,7 @@
     }
 
     // =========================================================
-    // НОВЫЕ ФУНКЦИИ: ТРЕНИРОВКА И ОШИБКИ
+    // НОВЫЕ ФУНКЦИИ: ТРЕНИРОВКА И ОШИБКИ (с объяснениями)
     // =========================================================
     let currentTrainingTask = null;
     let currentTopic = null;
@@ -2328,6 +2527,7 @@
       }
     }
 
+    // ---------- ОБНОВЛЁННЫЙ renderTrainingUI с объяснением ----------
     function renderTrainingUI() {
       if (!currentTrainingTask) {
         go("#/subject/inf?tab=training");
@@ -2346,6 +2546,11 @@
             <button class="btn ghost" id="hintTrainBtn">Подсказка</button>
           </div>
           <div class="hint" id="trainHint">${escapeHtml(task.explanation)}</div>
+          <!-- Блок для подробного объяснения -->
+          <div id="trainExplanationBox" style="display:none; margin-top:10px; padding:12px; border-radius:18px; border:2px solid var(--brand); background:color-mix(in srgb, var(--brand) 8%, var(--surface));">
+            <div style="font-weight:900; margin-bottom:6px;">📘 Объяснение:</div>
+            <div id="trainExplanationText" style="font-weight:700; line-height:1.5;">${escapeHtml(task.explanation)}</div>
+          </div>
           <div class="sp"></div>
           <button class="btn ghost" id="backTopicsBtn">← К выбору тем</button>
         </div>
@@ -2353,15 +2558,16 @@
       document.getElementById("checkTrainBtn").onclick = () => {
         const userAns = document.getElementById("trainAnswer").value.trim().replace(',','.').toLowerCase();
         const correct = String(task.answer).toLowerCase();
+        const explBox = document.getElementById("trainExplanationBox");
+        const explText = document.getElementById("trainExplanationText");
+        explBox.style.display = "block";
+        explText.innerHTML = `<p><strong>Правильный ответ:</strong> ${escapeHtml(task.answer)}</p><p>${escapeHtml(task.explanation)}</p>`;
         if (userAns === correct) {
           toast("Верно!", "Отлично", "ok");
-          generateNewTask();
-          renderTrainingUI();
+          // Не переходим автоматически, чтобы пользователь мог изучить объяснение
+          // но можно предложить следующую задачу
         } else {
           addMistake(currentTopic, task.text, task.answer, task.explanation, userAns);
-          const hintDiv = document.getElementById("trainHint");
-          hintDiv.classList.add("show");
-          hintDiv.innerHTML = `<strong>Правильный ответ: ${task.answer}</strong><br>${task.explanation}`;
           document.getElementById("trainAnswer").classList.add("input-error");
           toast("Ошибка записана", "Задание добавлено в раздел «Мои ошибки»", "bad");
         }
@@ -2392,6 +2598,9 @@
                 <span class="chip ok">Верно: ${escapeHtml(m.correctAnswer)}</span>
                 <button class="btn small" data-retry="${m.id}">🔄 Повторить</button>
                 <button class="btn small ghost" data-delete="${m.id}">🗑️ Удалить</button>
+              </div>
+              <div style="margin-top:8px; padding:8px; background:color-mix(in srgb, var(--brand) 8%, var(--surface)); border-radius:12px; font-weight:700; font-size:13px;">
+                <strong>Объяснение:</strong> ${escapeHtml(m.explanation)}
               </div>
             </div>
           `).join('')}
