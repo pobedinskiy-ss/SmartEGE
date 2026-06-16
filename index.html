@@ -194,8 +194,8 @@
       border-top: 1px solid var(--border);
       padding: 8px 10px 12px;
       display:grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 4px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 2px;
       position:absolute;
       left:0; right:0; bottom:0;
       z-index: 6;
@@ -210,11 +210,14 @@
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      gap: 3px;
+      gap: 2px;
       cursor:pointer;
       user-select:none;
       transition: transform .12s ease, background .2s ease, border-color .2s ease;
       color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .2px;
     }
     .tab:hover{ background: color-mix(in srgb, var(--surface-2) 70%, transparent); }
     .tab:active{ transform: scale(.98); }
@@ -224,7 +227,7 @@
       color: var(--text);
     }
     .tab .tab-ico{ font-size: 20px; line-height: 1; }
-    .tab .tab-label{ font-size: 10px; font-weight: 800; letter-spacing: .2px; }
+    .tab .tab-label{ font-size: 9px; font-weight: 800; letter-spacing: .2px; }
 
     .card{
       background: var(--surface);
@@ -802,19 +805,77 @@
 
     .home-stats{
       display:grid;
-      grid-template-columns:1fr 1fr 1fr;
+      grid-template-columns:1fr 1fr 1fr 1fr;
       gap:10px;
       margin-bottom:14px;
     }
     .home-stat{
       text-align:center;
-      padding:12px 6px;
+      padding:12px 4px;
       border-radius:var(--radius-lg);
       background:var(--surface-2);
       border:1px solid var(--border);
     }
-    .home-stat .num{font-size:24px;font-weight:1100;}
-    .home-stat .label{font-size:11px;color:var(--muted);font-weight:800;margin-top:4px;}
+    .home-stat .num{font-size:22px;font-weight:1100;}
+    .home-stat .label{font-size:10px;color:var(--muted);font-weight:800;margin-top:4px;}
+
+    .plan-item{
+      padding:12px 14px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      border-radius:var(--radius-md);
+      border:1px solid var(--border);
+      background:var(--surface-2);
+      margin-bottom:8px;
+    }
+    .plan-item .num{
+      width:28px;
+      height:28px;
+      border-radius:50%;
+      background:var(--brand);
+      color:#fff;
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      font-size:14px;
+    }
+    .plan-item .text{font-weight:800;flex:1;}
+    .plan-item .chip{margin-left:auto;}
+
+    /* Уведомления */
+    .notif-list{
+      max-height:300px;
+      overflow-y:auto;
+    }
+    .notif-item{
+      padding:10px 14px;
+      border-bottom:1px solid var(--border);
+      cursor:pointer;
+      transition:background .2s ease;
+    }
+    .notif-item:hover{background:var(--surface-2);}
+    .notif-item:last-child{border-bottom:none;}
+    .notif-item .title{font-weight:900;font-size:13px;}
+    .notif-item .desc{font-size:12px;color:var(--muted);margin-top:2px;}
+
+    /* Блок работы над ошибками */
+    .mistake-progress{
+      padding:12px 14px;
+      border-radius:var(--radius-lg);
+      background:color-mix(in srgb, var(--warning) 10%, var(--surface));
+      border:1px solid color-mix(in srgb, var(--warning) 30%, var(--border));
+      margin-bottom:12px;
+    }
+    .mistake-progress .row{ margin:6px 0; }
+    .mistake-progress .bar{ height:8px; margin-top:6px; }
+
+    /* Завершение ошибок */
+    .complete-screen{
+      text-align:center;
+      padding:20px;
+    }
+    .complete-screen .big-icon{font-size:64px;}
 
     @media (max-width: 360px) {
       .phone { width: 100vw; height: 100vh; border-radius: 0; border: none; }
@@ -827,7 +888,7 @@
       .subject { padding: 10px; }
       .task .meta { min-width: 80px; }
       .timer { padding: 4px 8px; font-size: 11px; }
-      .tab .tab-label { font-size: 9px; }
+      .tab .tab-label { font-size: 8px; }
       .home-stats{grid-template-columns:1fr 1fr;}
     }
 
@@ -860,6 +921,10 @@
           <span class="tab-ico">📈</span>
           <span class="tab-label">Прогресс</span>
         </div>
+        <div class="tab" data-tab="plan" role="button" aria-label="План">
+          <span class="tab-ico">📅</span>
+          <span class="tab-label">План</span>
+        </div>
         <div class="tab" data-tab="settings" role="button" aria-label="Настройки">
           <span class="tab-ico">⚙️</span>
           <span class="tab-label">Настройки</span>
@@ -873,7 +938,7 @@
     // =========================================================
     // 1) Состояние приложения (localStorage + sessionStorage)
     // =========================================================
-    const LS_KEY = "smartege_state_v7";
+    const LS_KEY = "smartege_state_v12";
     const AUTH_KEY = "smartege_auth_v1";
 
     // ----- ИНФОРМАТИКА: ПОЛНЫЙ НАБОР ЗАДАНИЙ (27+ заданий, все реальные) -----
@@ -1048,7 +1113,7 @@
       // Графы
       { id: "inf-9", themeId: "graphs", title: "Задание 9 (ФИПИ)", diff: "Средне", diffType: "warn",
         prompt: "На рисунке схема дорог между городами А, Б, В, Г, Д, Е, Ж, И, К. По каждой дороге можно двигаться только в одном направлении. Сколько существует различных путей из города А в город К, проходящих через город Ж? (Схема: А→Б→Ж, А→В→Ж, А→Г→Д→Ж, Ж→Е→К, Ж→И→К, Ж→К)",
-        answer: "6",
+        answer: "9",
         hint: "Пути из А в Ж: А→Б→Ж, А→В→Ж, А→Г→Д→Ж → 3 пути. Из Ж в К: Ж→Е→К, Ж→И→К, Ж→К → 3 пути. Всего: 3·3 = 9.",
         solution: "Шаг 1: Находим все пути из А в Ж: А→Б→Ж, А→В→Ж, А→Г→Д→Ж (3 пути).\nШаг 2: Находим все пути из Ж в К: Ж→Е→К, Ж→И→К, Ж→К (3 пути).\nШаг 3: Общее число путей = 3·3 = 9.\nОтвет: 9."
       },
@@ -1521,12 +1586,14 @@
         TASKS_INF.forEach(t => solved[t.id] = false);
         return solved;
       })(),
+      attempts: {},
       favorites: [],
       mistakes: [],
       achievements: {
         first: false,
         three: false,
-        five: false
+        five: false,
+        fifty: false
       },
       unreadMessages: { "m1": true, "m2": true, "m3": false },
       messages: [
@@ -1544,8 +1611,19 @@
       showOnlyFavoritesInf: false,
       examMode: null,
       examResults: null,
-      // Для статистики рекомендаций
-      topicStats: {} // { topicId: { correct: 0, total: 0 } }
+      topicStats: {},
+      streak: { lastDate: null, count: 0 },
+      isDemo: false,
+      plan: {
+        tasks: [
+          { text: "Прочитать теорию по слабой теме", done: false },
+          { text: "Решить 5 задач", done: false },
+          { text: "Повторить ошибки", done: false }
+        ]
+      },
+      notifications: [],
+      // Для работы над ошибками
+      mistakeReview: null // { total, fixed, startTime }
     };
 
     function loadState(){
@@ -1555,12 +1633,19 @@
         const parsed = JSON.parse(raw);
         if (!parsed.mistakes) parsed.mistakes = [];
         if (!parsed.topicStats) parsed.topicStats = {};
+        if (!parsed.streak) parsed.streak = { lastDate: null, count: 0 };
+        if (!parsed.attempts) parsed.attempts = {};
+        if (!parsed.plan) parsed.plan = { tasks: DEFAULT_STATE.plan.tasks.map(t => ({ ...t })) };
+        if (!parsed.notifications) parsed.notifications = [];
+        if (parsed.isDemo === undefined) parsed.isDemo = false;
+        if (!parsed.mistakeReview) parsed.mistakeReview = null;
         return { ...structuredClone(DEFAULT_STATE), ...parsed };
       }catch(e){
         return structuredClone(DEFAULT_STATE);
       }
     }
     function saveState(state){
+      if (state.isDemo) return;
       localStorage.setItem(LS_KEY, JSON.stringify(state));
     }
 
@@ -1601,13 +1686,13 @@
 
     function setHeader({ title, subtitle="", canBack=false, showBell=true }){
       const auth = loadAuth();
-      const unread = countUnread();
+      const unreadNotifs = state.notifications.filter(n => !n.seen).length;
       const left = canBack
         ? `<button class="icon-btn" id="btnBack" aria-label="Назад">${icon("back")}</button>`
         : `<button class="icon-btn" id="btnAvatar" aria-label="Профиль">${avatarMarkup(auth)}</button>`;
 
       const right = showBell
-        ? `<button class="icon-btn" id="btnBell" aria-label="Уведомления" style="position:relative">${icon("bell")}${unread>0 ? `<span class="badge" aria-label="Непрочитанные">${unread}</span>` : ""}</button>`
+        ? `<button class="icon-btn" id="btnBell" aria-label="Уведомления" style="position:relative">${icon("bell")}${unreadNotifs>0 ? `<span class="badge" aria-label="Уведомления">${unreadNotifs}</span>` : ""}</button>`
         : `<span style="width:42px;height:42px"></span>`;
 
       $header.innerHTML = `
@@ -1623,9 +1708,8 @@
       if(backBtn) backBtn.addEventListener("click", ()=> history.back());
 
       const bellBtn = document.getElementById("btnBell");
-      if(bellBtn) bellBtn.addEventListener("click", ()=> {
-        go("#/messages");
-        toast("Уведомления", "Открыл раздел «Сообщения».", "ok");
+      if(bellBtn) bellBtn.addEventListener("click", ()=>{
+        showNotifications();
       });
     }
 
@@ -1695,18 +1779,23 @@
 
       setActiveTab(r1);
 
-      // Новая главная страница
       if(r1 === "home"){ setHeader({ title: "Главная", subtitle: auth.name, canBack:false, showBell:true }); renderHome(); return; }
       if(r1 === "subjects"){ setHeader({ title: "Предметы", subtitle: auth.name, canBack:false, showBell:true }); renderSubjects(); return; }
       if(r1 === "exam"){ setHeader({ title: "Экзамен", subtitle: "Тренировка в формате ЕГЭ", canBack:false, showBell:true }); renderExam(); return; }
       if(r1 === "progress"){ setHeader({ title: "Прогресс", subtitle: "Достижения и рейтинг", canBack:false, showBell:true }); renderProgress(); return; }
-      if(r1 === "messages"){ setHeader({ title: "Сообщения", subtitle: "Подсказки и напоминания", canBack:false, showBell:true }); renderMessages(); return; }
+      if(r1 === "plan"){ setHeader({ title: "План подготовки", subtitle: "Автоматические рекомендации", canBack:false, showBell:true }); renderPlan(); return; }
       if(r1 === "settings"){ setHeader({ title: "Настройки", subtitle: "Тема и аккаунт", canBack:false, showBell:true }); renderSettings(); return; }
 
       if(r1 === "subject" && r2 === "inf"){
         const qs = new URLSearchParams((location.hash.split("?")[1]||""));
         const tab = qs.get("tab") || "theory";
-        setHeader({ title: "Информатика", subtitle: tab === "theory" ? "Теория" : (tab === "practice" ? "Практика" : (tab === "training" ? "Тренировка" : "Мои ошибки")), canBack:true, showBell:true });
+        let subtitle = tab === "theory" ? "Теория" : (tab === "practice" ? "Практика" : (tab === "training" ? "Тренировка" : "Мои ошибки"));
+        const themeParam = qs.get("theme");
+        if (themeParam) {
+          const theme = THEMES_INF.find(t => t.id === themeParam);
+          if (theme) subtitle += ` · ${theme.name}`;
+        }
+        setHeader({ title: "Информатика", subtitle: subtitle, canBack:true, showBell:true });
         if (tab === "training") {
           if (!currentTopic) renderTrainingTopicSelector();
           else renderTrainingUI();
@@ -1759,7 +1848,6 @@
         const examTab = tabs.find(t => t.dataset.tab === "exam");
         if (examTab && tab === "exam") examTab.classList.add("active");
       }
-      // home tab
       if(tab === "home"){
         tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === "home"));
       }
@@ -1774,7 +1862,124 @@
     window.addEventListener("hashchange", route);
 
     // =========================================================
-    // 4) Экраны
+    // 4) Уведомления
+    // =========================================================
+    function addNotification(title, text, hash) {
+      const exists = state.notifications.some(n => n.title === title && n.text === text);
+      if (exists) return;
+      state.notifications.unshift({
+        id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        title, text, hash,
+        seen: false,
+        date: new Date().toISOString()
+      });
+      if (state.notifications.length > 50) state.notifications.pop();
+      saveState(state);
+      updateBellBadge();
+    }
+
+    function updateBellBadge() {
+      const bellBtn = document.getElementById("btnBell");
+      if (!bellBtn) return;
+      const unread = state.notifications.filter(n => !n.seen).length;
+      let badge = bellBtn.querySelector(".badge");
+      if (unread > 0) {
+        if (!badge) {
+          badge = document.createElement("span");
+          badge.className = "badge";
+          bellBtn.appendChild(badge);
+        }
+        badge.textContent = unread;
+      } else {
+        if (badge) badge.remove();
+      }
+    }
+
+    function showNotifications() {
+      const notifs = state.notifications;
+      if (notifs.length === 0) {
+        toast("Уведомления", "Нет новых уведомлений", "ok");
+        return;
+      }
+      notifs.forEach(n => n.seen = true);
+      saveState(state);
+      updateBellBadge();
+
+      const html = `
+        <div class="card pad">
+          <div style="font-weight:1100;margin-bottom:10px;">Уведомления</div>
+          <div class="notif-list">
+            ${notifs.map(n => `
+              <div class="notif-item" data-hash="${n.hash || '#'}">
+                <div class="title">${escapeHtml(n.title)}</div>
+                <div class="desc">${escapeHtml(n.text)}</div>
+              </div>
+            `).join('')}
+          </div>
+          <button class="btn ghost" style="margin-top:10px;" id="closeNotifBtn">Закрыть</button>
+        </div>
+      `;
+      $main.innerHTML = html;
+      document.querySelectorAll(".notif-item").forEach(el => {
+        el.addEventListener("click", (e) => {
+          const hash = el.getAttribute("data-hash");
+          if (hash && hash !== '#') {
+            go(hash);
+          } else {
+            route();
+          }
+        });
+      });
+      document.getElementById("closeNotifBtn").addEventListener("click", ()=>{
+        route();
+      });
+    }
+
+    function checkAbsence() {
+      const lastDate = state.streak?.lastDate;
+      if (lastDate) {
+        const diff = Math.floor((Date.now() - new Date(lastDate)) / (1000*60*60*24));
+        if (diff >= 3) {
+          addNotification("🔥 Вы не заходили 3 дня", "Продолжить подготовку?", "#/home");
+        }
+      }
+    }
+
+    // =========================================================
+    // 5) Вспомогательные функции
+    // =========================================================
+    function getWeakThemes() {
+      const stats = state.topicStats || {};
+      const weak = [];
+      for (const theme of THEMES_INF) {
+        const stat = stats[theme.id];
+        if (stat && stat.total >= 2) {
+          const pct = Math.round((stat.correct / stat.total) * 100);
+          if (pct < 70) {
+            weak.push({ ...theme, pct });
+          }
+        }
+      }
+      weak.sort((a,b) => a.pct - b.pct);
+      return weak;
+    }
+
+    function openTheoryByTheme(themeId) {
+      go("#/subject/inf?tab=theory&theme=" + themeId);
+    }
+
+    // Функция для подсчёта ошибок по темам
+    function getMistakesByTopic() {
+      const groups = {};
+      state.mistakes.forEach(m => {
+        if (!groups[m.topicId]) groups[m.topicId] = 0;
+        groups[m.topicId]++;
+      });
+      return groups;
+    }
+
+    // =========================================================
+    // 6) Экраны
     // =========================================================
     function renderLogin(){
       $main.innerHTML = `
@@ -1790,45 +1995,62 @@
         </div>
       `;
 
-      const login = (name="Степан") => {
-        saveAuth({ name, avatar: "linear-gradient(180deg, var(--brand), var(--brand-2))" });
-        toast("Привет, " + name + "!", "Авторизация выполнена.", "ok");
+      const login = (name="Степан", isDemo=false) => {
+        if (isDemo) {
+          state.isDemo = true;
+          const newState = structuredClone(DEFAULT_STATE);
+          newState.isDemo = true;
+          state = newState;
+          saveAuth({ name: "Демо", avatar: "linear-gradient(180deg, var(--brand), var(--brand-2))" });
+          toast("Демо-режим", "Прогресс не сохраняется.", "ok");
+        } else {
+          state.isDemo = false;
+          saveAuth({ name, avatar: "linear-gradient(180deg, var(--brand), var(--brand-2))" });
+          toast("Привет, " + name + "!", "Авторизация выполнена.", "ok");
+        }
+        checkAbsence();
         go("#/home");
       };
 
-      document.getElementById("loginBtn").addEventListener("click", ()=> login("Степан"));
-      document.getElementById("demoBtn").addEventListener("click", ()=> login("Демо"));
+      document.getElementById("loginBtn").addEventListener("click", ()=> login("Степан", false));
+      document.getElementById("demoBtn").addEventListener("click", ()=> login("Демо", true));
     }
 
-    // ---- НОВАЯ ГЛАВНАЯ СТРАНИЦА ----
+    // ---- ГЛАВНАЯ СТРАНИЦА ----
     function renderHome(){
       const auth = loadAuth();
       const solvedCount = TASKS_INF.filter(t => state.solved[t.id]).length;
       const total = TASKS_INF.length;
       const pct = total ? Math.round((solvedCount/total)*100) : 0;
-      // Сегодняшняя статистика (приблизительная)
-      const todaySolved = solvedCount; // упрощённо
-      const accuracy = pct;
+      const streak = state.streak || { count: 0 };
+      const streakCount = streak.count || 0;
 
-      // Самая слабая тема
-      let weakest = null;
-      let weakestPct = 100;
-      for (const theme of THEMES_INF) {
-        const totalIn = theme.taskIds.length;
-        const solvedIn = theme.taskIds.filter(id => state.solved[id]).length;
-        const p = totalIn ? Math.round((solvedIn/totalIn)*100) : 0;
-        if (p < weakestPct && totalIn > 0) {
-          weakestPct = p;
-          weakest = theme;
-        }
-      }
+      const weakThemes = getWeakThemes();
+      const weakest = weakThemes.length > 0 ? weakThemes[0] : null;
+      const weakestPct = weakest ? weakest.pct : 100;
 
-      // Рекомендация задач
       let recTasks = 5;
       if (weakest) {
         const unsolved = TASKS_INF.filter(t => t.themeId === weakest.id && !state.solved[t.id]);
         recTasks = Math.min(unsolved.length, 5);
         if (recTasks === 0) recTasks = 5;
+      }
+
+      // Показываем количество неисправленных ошибок
+      const mistakesCount = state.mistakes.length;
+      let mistakeBlock = '';
+      if (mistakesCount > 0) {
+        mistakeBlock = `
+          <div class="card pad" style="border-color:color-mix(in srgb, var(--danger) 30%, var(--border)); background:color-mix(in srgb, var(--danger) 6%, var(--surface)); margin-top:12px;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <span style="font-size:28px;">⚠️</span>
+              <div>
+                <div style="font-weight:1100;">Неисправленных ошибок: ${mistakesCount}</div>
+                <button class="btn small" style="margin-top:4px;" id="fixMistakesBtn">Исправить ошибки</button>
+              </div>
+            </div>
+          </div>
+        `;
       }
 
       $main.innerHTML = `
@@ -1847,41 +2069,40 @@
             <div class="label">Точность</div>
           </div>
           <div class="home-stat">
+            <div class="num">${streakCount}</div>
+            <div class="label">🔥 Серия дней</div>
+          </div>
+          <div class="home-stat">
             <div class="num">${TASKS_INF.length}</div>
             <div class="label">Всего заданий</div>
           </div>
         </div>
 
-        ${weakest ? `
-          <div class="card pad" style="border-color:color-mix(in srgb, var(--warning) 40%, var(--border)); background:color-mix(in srgb, var(--warning) 6%, var(--surface));">
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-              <span style="font-size:28px;">⚠️</span>
-              <div>
-                <div style="font-weight:1100;">Самая слабая тема</div>
-                <div style="font-weight:800;font-size:15px;">${escapeHtml(weakest.name)}</div>
-                <div class="muted" style="font-weight:700;font-size:12px;">Прогресс: ${weakestPct}%</div>
-              </div>
-            </div>
-          </div>
-        ` : `
-          <div class="card pad" style="border-color:color-mix(in srgb, var(--success) 30%, var(--border)); background:color-mix(in srgb, var(--success) 6%, var(--surface));">
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-              <span style="font-size:28px;">🎉</span>
-              <div>
-                <div style="font-weight:1100;">Отличный прогресс!</div>
+        ${mistakeBlock}
+
+        <div class="card pad" style="border-color:color-mix(in srgb, var(--warning) 40%, var(--border)); background:color-mix(in srgb, var(--warning) 6%, var(--surface)); margin-top:12px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:28px;">🎯</span>
+            <div>
+              <div style="font-weight:1100;">Рекомендации</div>
+              ${weakest ? `
+                <div style="font-weight:800;font-size:15px;">Самая слабая тема: ${escapeHtml(weakest.name)}</div>
+                <div class="muted" style="font-weight:700;font-size:13px;">Точность: ${weakestPct}%</div>
+                <div style="font-weight:700;font-size:13px;margin-top:4px;">Рекомендуем: решить ${recTasks} заданий</div>
+              ` : `
                 <div style="font-weight:700;">Вы справляетесь со всеми темами</div>
-              </div>
+              `}
             </div>
           </div>
-        `}
+        </div>
 
         <div class="card pad" style="margin-top:14px;">
-          <div style="font-weight:1100;">💡 Рекомендуем решить ${recTasks} задач</div>
+          <div style="font-weight:1100;">💡 Рекомендуем</div>
           <div class="muted" style="font-weight:700;font-size:13px;margin-top:4px;">
             ${weakest ? `По теме «${weakest.name}» для закрепления` : 'Для поддержания формы'}
           </div>
           <button class="btn primary" style="margin-top:12px;width:100%;" id="homePracticeBtn">
-            🎯 Перейти к практике
+            🚀 Перейти к практике
           </button>
         </div>
 
@@ -1892,11 +2113,118 @@
           ${achRow("Первая пятёрка", "Решить одно задание", state.achievements.first)}
           ${achRow("В ударе", "Решить 3 задания", state.achievements.three)}
           ${achRow("Ударник труда", "Решить 5 заданий", state.achievements.five)}
+          ${achRow("50 задач", "Решить 50 заданий", state.achievements.fifty)}
         </div>
       `;
 
       document.getElementById("homePracticeBtn")?.addEventListener("click", ()=>{
-        go("#/subject/inf?tab=practice");
+        const weak = getWeakThemes();
+        if (weak.length > 0) {
+          const topicId = weak[0].id;
+          currentTopic = topicId;
+          generateNewTask();
+          go("#/subject/inf?tab=training");
+          toast("Персонализированная тренировка", `Тема: ${weak[0].name}`, "ok");
+        } else {
+          go("#/subject/inf?tab=training");
+        }
+      });
+
+      document.getElementById("fixMistakesBtn")?.addEventListener("click", ()=>{
+        go("#/subject/inf?tab=mistakes");
+        // Если есть ошибки, сразу запускаем повтор
+        setTimeout(() => {
+          const btn = document.getElementById("reviewAllMistakes");
+          if (btn) btn.click();
+        }, 300);
+      });
+    }
+
+    // ---- ПЛАН ----
+    function renderPlan(){
+      const weakThemes = getWeakThemes();
+      const examDate = new Date(2026, 5, 1);
+      const now = new Date();
+      const daysLeft = Math.max(0, Math.floor((examDate - now) / (1000*60*60*24)));
+
+      const planTasks = state.plan?.tasks || DEFAULT_STATE.plan.tasks.map(t => ({ ...t }));
+
+      const allDone = planTasks.every(t => t.done);
+      if (allDone && planTasks.length > 0) {
+        addNotification("📅 План на сегодня выполнен", "Отличная работа! Завтра новый план.", "#/plan");
+      }
+
+      $main.innerHTML = `
+        <div class="section-title">📅 План подготовки</div>
+        <div class="card pad">
+          <div style="font-weight:1100;font-size:18px;">До ЕГЭ: ${daysLeft} дней</div>
+        </div>
+
+        <div class="card pad" style="margin-top:12px;">
+          <div style="font-weight:1100;margin-bottom:8px;">Слабые темы</div>
+          ${weakThemes.length ? weakThemes.slice(0, 3).map((w, i) => `
+            <div class="plan-item">
+              <span class="num">${i+1}</span>
+              <span class="text">${escapeHtml(w.name)}</span>
+              <span class="chip">${w.pct}%</span>
+            </div>
+          `).join('') : `
+            <div class="muted">Отлично! Слабых тем не обнаружено.</div>
+          `}
+        </div>
+
+        <div class="card pad" style="margin-top:12px;">
+          <div style="font-weight:1100;margin-bottom:8px;">Сегодня</div>
+          ${planTasks.map((item, idx) => `
+            <div class="plan-item" style="border-color:${item.done ? 'var(--success)' : 'var(--border)'}; background:${item.done ? 'color-mix(in srgb, var(--success) 10%, var(--surface))' : 'var(--surface-2)'};">
+              <span class="num" style="background:${item.done ? 'var(--success)' : 'var(--brand)'};">${idx+1}</span>
+              <span class="text">${escapeHtml(item.text)}</span>
+              <span class="chip" style="cursor:pointer;" data-plan-toggle="${idx}">${item.done ? '✅' : '⬜'}</span>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="card pad" style="margin-top:12px;">
+          <div style="font-weight:1100;margin-bottom:8px;">Завтра</div>
+          <div class="muted">План будет автоматически сгенерирован на основе ваших результатов.</div>
+          <div class="plan-item" style="border-color:var(--border);background:var(--surface-2);opacity:0.7;">
+            <span class="num">1</span>
+            <span class="text">Повторить слабые темы</span>
+            <span class="chip">⏳</span>
+          </div>
+          <div class="plan-item" style="border-color:var(--border);background:var(--surface-2);opacity:0.7;">
+            <span class="num">2</span>
+            <span class="text">Решить 10 заданий</span>
+            <span class="chip">⏳</span>
+          </div>
+        </div>
+
+        <button class="btn primary full" style="margin-top:12px;" id="startPlanBtn">
+          🚀 Начать выполнение плана
+        </button>
+      `;
+
+      document.querySelectorAll("[data-plan-toggle]").forEach(el => {
+        el.addEventListener("click", () => {
+          const idx = parseInt(el.getAttribute("data-plan-toggle"));
+          if (!isNaN(idx) && state.plan && state.plan.tasks[idx]) {
+            state.plan.tasks[idx].done = !state.plan.tasks[idx].done;
+            saveState(state);
+            renderPlan();
+          }
+        });
+      });
+
+      document.getElementById("startPlanBtn")?.addEventListener("click", ()=>{
+        if (weakThemes.length > 0) {
+          const topicId = weakThemes[0].id;
+          currentTopic = topicId;
+          generateNewTask();
+          go("#/subject/inf?tab=training");
+          toast("План", "Начинаем тренировку по слабой теме", "ok");
+        } else {
+          go("#/subject/inf?tab=practice");
+        }
       });
     }
 
@@ -1962,6 +2290,9 @@
 
     // ---- ИНФОРМАТИКА ----
     function renderSubjectInf(tab){
+      const qs = new URLSearchParams((location.hash.split("?")[1]||""));
+      const themeParam = qs.get("theme");
+
       $main.innerHTML = `
         <div class="seg" role="tablist" aria-label="Табы предмета">
           <button class="${tab==='theory'?'active':''}" id="tabTheory" role="tab" aria-selected="${tab==='theory'}">Теория</button>
@@ -1969,7 +2300,7 @@
           <button class="${tab==='training'?'active':''}" id="tabTraining" role="tab" aria-selected="${tab==='training'}">🎯 Тренировка</button>
           <button class="${tab==='mistakes'?'active':''}" id="tabMistakes" role="tab" aria-selected="${tab==='mistakes'}">⚠️ Ошибки (${state.mistakes.length})</button>
         </div>
-        ${tab === "theory" ? renderInfTheory() : (tab === "practice" ? renderInfPractice() : "")}
+        ${tab === "theory" ? renderInfTheory(themeParam) : (tab === "practice" ? renderInfPractice() : "")}
       `;
 
       document.getElementById("tabTheory").addEventListener("click", ()=> go("#/subject/inf?tab=theory"));
@@ -1993,9 +2324,15 @@
           saveState(state);
           renderSubjectInf("practice");
         });
+        document.getElementById("filterFavoritesInf")?.addEventListener("change", (e)=>{
+          state.showOnlyFavoritesInf = e.target.checked;
+          saveState(state);
+          renderSubjectInf("practice");
+        });
         document.getElementById("resetFiltersInf")?.addEventListener("click", ()=>{
           state.selectedThemeInf = null;
           state.showOnlyUnsolvedInf = false;
+          state.showOnlyFavoritesInf = false;
           saveState(state);
           renderSubjectInf("practice");
         });
@@ -2024,22 +2361,41 @@
           renderSubjectInf(tab);
         });
       });
+
+      if (themeParam && tab === "theory") {
+        setTimeout(() => {
+          const targetTheme = THEMES_INF.find(t => t.id === themeParam);
+          if (targetTheme) {
+            const items = document.querySelectorAll(".acc-item");
+            items.forEach(item => {
+              const strong = item.querySelector(".acc-head strong");
+              if (strong && strong.textContent.includes(targetTheme.name)) {
+                item.classList.add("open");
+                item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            });
+          }
+        }, 200);
+      }
     }
 
-    function renderInfTheory(){
+    function renderInfTheory(themeParam){
       const getThemeTaskCount = (themeId) => {
         const theme = THEMES_INF.find(t => t.id === themeId);
         return theme ? theme.taskIds.length : 0;
       };
+      const getOpenClass = (themeId) => {
+        return themeParam === themeId ? 'open' : '';
+      };
       return `
         <div class="section-title">Учебные материалы <span class="chip">Теория ФИПИ</span></div>
         <div class="acc" aria-label="Список тем (теория)">
-          ${accItem("Кодирование информации", THEORY_INF.coding, ["Равномерные/неравномерные коды", "Условие Фано", "Количество информации"], getThemeTaskCount("coding"))}
-          ${accItem("Алгебра логики", THEORY_INF.logic, ["Логические операции", "Таблицы истинности", "Законы де Моргана"], getThemeTaskCount("logic"))}
-          ${accItem("Системы счисления", THEORY_INF.systems, ["Двоичная система", "Перевод между системами", "Арифметика"], getThemeTaskCount("systems"))}
-          ${accItem("Графы", THEORY_INF.graphs, ["Поиск путей", "Взвешенные графы"], getThemeTaskCount("graphs"))}
-          ${accItem("Алгоритмы", THEORY_INF.algorithms, ["Исполнители", "Рекурсия", "Анализ"], getThemeTaskCount("algorithms"))}
-          ${accItem("Программирование", THEORY_INF.programming, ["Динамика", "Массивы"], getThemeTaskCount("programming"))}
+          ${accItem("Кодирование информации", THEORY_INF.coding, ["Равномерные/неравномерные коды", "Условие Фано", "Количество информации"], getThemeTaskCount("coding"), getOpenClass("coding"))}
+          ${accItem("Алгебра логики", THEORY_INF.logic, ["Логические операции", "Таблицы истинности", "Законы де Моргана"], getThemeTaskCount("logic"), getOpenClass("logic"))}
+          ${accItem("Системы счисления", THEORY_INF.systems, ["Двоичная система", "Перевод между системами", "Арифметика"], getThemeTaskCount("systems"), getOpenClass("systems"))}
+          ${accItem("Графы", THEORY_INF.graphs, ["Поиск путей", "Взвешенные графы"], getThemeTaskCount("graphs"), getOpenClass("graphs"))}
+          ${accItem("Алгоритмы", THEORY_INF.algorithms, ["Исполнители", "Рекурсия", "Анализ"], getThemeTaskCount("algorithms"), getOpenClass("algorithms"))}
+          ${accItem("Программирование", THEORY_INF.programming, ["Динамика", "Массивы"], getThemeTaskCount("programming"), getOpenClass("programming"))}
         </div>
         <div class="divider"></div>
         <div class="card pad">
@@ -2051,6 +2407,25 @@
               </div>
             </div>
             <button class="btn" id="toPracticeInf">К практике</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function accItem(title, theoryText, items, taskCount, openClass){
+      const taskText = taskCount > 0 ? ` (${taskCount} заданий)` : '';
+      return `
+        <div class="acc-item ${openClass}">
+          <div class="acc-head" role="button" aria-label="Открыть тему">
+            <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+              <strong>${escapeHtml(title)}${escapeHtml(taskText)}</strong>
+              <span>${items.length} подтемы</span>
+            </div>
+            <span class="chip">▼</span>
+          </div>
+          <div class="acc-body">
+            <ul>${items.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
+            <div class="theory-text">${theoryText}</div>
           </div>
         </div>
       `;
@@ -2068,6 +2443,9 @@
       }
       if (state.showOnlyUnsolvedInf) {
         filteredTasks = filteredTasks.filter(t => !state.solved[t.id]);
+      }
+      if (state.showOnlyFavoritesInf) {
+        filteredTasks = filteredTasks.filter(t => state.favorites.includes(t.id));
       }
 
       const getThemeProgress = (themeId) => {
@@ -2095,33 +2473,17 @@
           <span class="chip ${!state.selectedThemeInf ? 'active' : ''}" data-theme-filter-inf="all">Все темы</span>
           ${THEMES_INF.map(t => `<span class="chip ${state.selectedThemeInf === t.id ? 'active' : ''}" data-theme-filter-inf="${t.id}">${escapeHtml(t.name)}${getThemeProgress(t.id)}</span>`).join('')}
         </div>
-        <div class="row" style="margin-bottom:12px;">
+        <div class="row" style="margin-bottom:12px;flex-wrap:wrap;gap:8px;">
           <label style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;">
             <input type="checkbox" id="filterUnsolvedInf" ${state.showOnlyUnsolvedInf ? 'checked' : ''}> Только нерешённые
           </label>
-          <button class="btn ghost" style="height:36px;padding:0 12px;" id="resetFiltersInf">Сбросить</button>
+          <label style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;">
+            <input type="checkbox" id="filterFavoritesInf" ${state.showOnlyFavoritesInf ? 'checked' : ''}> ⭐ Избранные
+          </label>
+          <button class="btn ghost" style="height:36px;padding:0 12px;" id="resetFiltersInf">Сбросить фильтры</button>
         </div>
         <div class="list" aria-label="Список заданий">
           ${filteredTasks.length ? filteredTasks.map(t => taskRow(t, 'inf')).join('') : '<div class="card pad muted" style="text-align:center;">Нет заданий по выбранным фильтрам</div>'}
-        </div>
-      `;
-    }
-
-    function accItem(title, theoryText, items, taskCount){
-      const taskText = taskCount > 0 ? ` (${taskCount} заданий)` : '';
-      return `
-        <div class="acc-item">
-          <div class="acc-head" role="button" aria-label="Открыть тему">
-            <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
-              <strong>${escapeHtml(title)}${escapeHtml(taskText)}</strong>
-              <span>${items.length} подтемы</span>
-            </div>
-            <span class="chip">▼</span>
-          </div>
-          <div class="acc-body">
-            <ul>${items.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
-            <div class="theory-text">${theoryText}</div>
-          </div>
         </div>
       `;
     }
@@ -2166,7 +2528,7 @@
       saveState(state);
     }
 
-    // ---- ЗАДАНИЕ (с пошаговым решением) ----
+    // ---- ЗАДАНИЕ ----
     function renderTask(task){
       const DURATION = 5 * 60;
       let remain = DURATION;
@@ -2174,6 +2536,10 @@
 
       const solvedAlready = !!state.solved[task.id];
       const isFav = state.favorites.includes(task.id);
+      const attempts = state.attempts[task.id] || 0;
+
+      const canShowSolution = solvedAlready || attempts >= 3;
+
       const solutionSteps = task.solution ? task.solution.split('\n').filter(s => s.trim()) : [];
 
       $main.innerHTML = `
@@ -2196,11 +2562,9 @@
           <div class="row" style="gap:10px;align-items:stretch">
             <button class="btn primary" style="flex:1" id="checkBtn">Проверить</button>
             <button class="btn" style="width:140px" id="hintBtn">Подсказка</button>
-            <button class="btn" style="width:160px" id="solutionBtn">📘 Решение</button>
           </div>
           <div class="hint" id="hintBox" role="note">${escapeHtml(task.hint)}</div>
 
-          <!-- Пошаговое решение -->
           <div id="solutionBox" style="display:none; margin-top:10px;">
             <div class="step-solution">
               ${solutionSteps.length ? solutionSteps.map((step, i) => `
@@ -2212,8 +2576,10 @@
             </div>
           </div>
 
+          <button id="showSolutionBtn" style="display:${canShowSolution ? 'inline-flex' : 'none'}; margin-top:10px;" class="btn ghost">📖 Показать решение</button>
+
           <div class="row" style="margin-top:10px;">
-            <span class="chip ${solvedAlready ? "ok" : ""}">${solvedAlready ? "Уже решено" : "Статус: не решено"}</span>
+            <span class="chip ${solvedAlready ? "ok" : ""}">${solvedAlready ? "✅ Решено" : `❌ Не решено (попыток: ${attempts})`}</span>
             <button class="btn ghost" id="backToList">К списку</button>
           </div>
         </div>
@@ -2223,8 +2589,8 @@
       const $answer = document.getElementById("answer");
       const $hintBox = document.getElementById("hintBox");
       const $hintBtn = document.getElementById("hintBtn");
-      const $solutionBtn = document.getElementById("solutionBtn");
       const $solutionBox = document.getElementById("solutionBox");
+      const $showSolutionBtn = document.getElementById("showSolutionBtn");
 
       function fmt(t){
         const m = String(Math.floor(t/60)).padStart(2,"0");
@@ -2259,7 +2625,7 @@
         }
       });
 
-      $solutionBtn.addEventListener("click", ()=>{
+      $showSolutionBtn.addEventListener("click", ()=>{
         if ($solutionBox.style.display === "none") {
           $solutionBox.style.display = "block";
           $hintBox.classList.remove("show");
@@ -2273,22 +2639,37 @@
         const correct = normalizeAnswer(task.answer);
 
         $answer.classList.remove("input-error");
-
-        // Показываем решение при проверке
-        $solutionBox.style.display = "block";
+        $hintBox.classList.remove("show");
 
         if(user === correct){
           markSolved(task.id);
-          toast("Верно!", "Задание засчитано. Прогресс обновлён.", "ok");
-          $hintBox.classList.remove("show");
+          toast("✅ Верно!", "Задание засчитано. Можно посмотреть решение.", "ok");
+          $solutionBox.style.display = "block";
+          $showSolutionBtn.style.display = "inline-flex";
         }else{
-          toast("Неверно", "Попробуй снова или нажми «Подсказка».", "bad");
+          const newAttempts = (state.attempts[task.id] || 0) + 1;
+          state.attempts[task.id] = newAttempts;
+          saveState(state);
+
+          toast("❌ Неверно", "Ошибка записана в раздел «Мои ошибки»", "bad");
           $answer.classList.add("input-error");
+
           const topic = THEMES_INF.find(t => t.taskIds.includes(task.id));
           const topicId = topic ? topic.id : 'unknown';
           addMistake(topicId, task.prompt, task.answer, task.hint, $answer.value);
-          // Обновляем статистику
           updateTopicStats(topicId, false);
+
+          if (newAttempts >= 3) {
+            $showSolutionBtn.style.display = "inline-flex";
+            toast("3 ошибки", "Теперь можно посмотреть решение.", "ok");
+          } else {
+            $solutionBox.style.display = "none";
+            $showSolutionBtn.style.display = "none";
+          }
+          const statusEl = document.querySelector(".row .chip:first-child");
+          if (statusEl) {
+            statusEl.textContent = `❌ Не решено (попыток: ${newAttempts})`;
+          }
         }
       });
 
@@ -2301,7 +2682,7 @@
       setTimeout(()=> $answer.focus(), 50);
     }
 
-    // ---- ЭКЗАМЕН (27 заданий, таймер 3ч55м) ----
+    // ---- ЭКЗАМЕН ----
     function renderExam() {
       const totalTasks = TASKS_INF.length;
       $main.innerHTML = `
@@ -2368,7 +2749,6 @@
       const remain = Math.max(0, totalTime - elapsed);
       const solvedAlready = !!state.solved[task.id];
 
-      // Прогресс-точки
       let dots = tasks.map((id, idx) => {
         const ans = answers[idx];
         let cls = 'exam-dot';
@@ -2413,7 +2793,6 @@
         </div>
       `;
 
-      // Таймер
       const timerInterval = setInterval(() => {
         if (state.examMode?.finished) { clearInterval(timerInterval); return; }
         const elapsedNow = Math.floor((Date.now() - state.examMode.startTime) / 1000);
@@ -2430,7 +2809,6 @@
         }
       }, 1000);
 
-      // Навигация по точкам
       document.querySelectorAll("[data-exam-idx]").forEach(el => {
         el.addEventListener("click", () => {
           const idx = parseInt(el.getAttribute("data-exam-idx"));
@@ -2496,7 +2874,6 @@
       return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     }
 
-    // ---- ЗАВЕРШЕНИЕ ЭКЗАМЕНА с детальным разбором ----
     function finishExam() {
       if (!state.examMode) return;
       const { subjectId, tasks, answers } = state.examMode;
@@ -2506,7 +2883,6 @@
         const userAnswer = answers[idx] ? normalizeAnswer(answers[idx]) : null;
         const correct = task ? normalizeAnswer(task.answer) : null;
         const isCorrect = userAnswer === correct;
-        // Обновляем статистику для рекомендаций
         if (task) {
           const theme = THEMES_INF.find(t => t.taskIds.includes(task.id));
           if (theme) updateTopicStats(theme.id, isCorrect);
@@ -2527,18 +2903,34 @@
       go("#/exam/result");
     }
 
-    // ---- РЕЗУЛЬТАТЫ ЭКЗАМЕНА ----
     function renderExamResult() {
       const results = state.examResults || [];
       const correctCount = results.filter(r => r.isCorrect).length;
       const total = results.length;
       const percent = total ? Math.round((correctCount/total)*100) : 0;
 
-      // Оценка
       let grade = 'good';
       let gradeText = 'Отлично!';
       if (percent < 40) { grade = 'bad'; gradeText = 'Нужно больше практики'; }
       else if (percent < 70) { grade = 'ok'; gradeText = 'Хороший результат!'; }
+
+      const themeStats = {};
+      results.forEach(r => {
+        if (!r.task) return;
+        const theme = THEMES_INF.find(t => t.taskIds.includes(r.task.id));
+        if (!theme) return;
+        if (!themeStats[theme.id]) themeStats[theme.id] = { correct: 0, total: 0, name: theme.name };
+        themeStats[theme.id].total++;
+        if (r.isCorrect) themeStats[theme.id].correct++;
+      });
+      const strongThemes = [];
+      const weakThemes = [];
+      for (const id in themeStats) {
+        const s = themeStats[id];
+        const pct = Math.round((s.correct / s.total) * 100);
+        if (pct >= 70) strongThemes.push({ name: s.name, pct });
+        else weakThemes.push({ name: s.name, pct });
+      }
 
       const wrongTasks = results.filter(r => !r.isCorrect);
 
@@ -2554,6 +2946,23 @@
               <span>❌ Ошибок: <strong>${total - correctCount}</strong></span>
             </div>
             <div class="bar" style="margin-top:8px;"><i style="width:${percent}%;"></i></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="row" style="gap:10px;flex-wrap:wrap;">
+            ${strongThemes.length ? `
+              <div style="flex:1;">
+                <div style="font-weight:900;">Сильные темы ✓</div>
+                ${strongThemes.map(t => `<div class="chip ok">${t.name} (${t.pct}%)</div>`).join('')}
+              </div>
+            ` : ''}
+            ${weakThemes.length ? `
+              <div style="flex:1;">
+                <div style="font-weight:900;">Слабые темы ✗</div>
+                ${weakThemes.map(t => `<div class="chip bad">${t.name} (${t.pct}%)</div>`).join('')}
+              </div>
+            ` : ''}
           </div>
 
           <div class="divider"></div>
@@ -2580,7 +2989,8 @@
           `}
 
           <div class="sp"></div>
-          <button class="btn primary full" id="backToExam">К выбору экзамена</button>
+          <button class="btn primary full" id="createPlanBtn">📅 Создать план подготовки</button>
+          <button class="btn secondary full" style="margin-top:6px;" id="backToExam">К выбору экзамена</button>
         </div>
       `;
 
@@ -2594,6 +3004,10 @@
             toast("Добавлено", "Задание в разделе «Мои ошибки»", "ok");
           }
         });
+      });
+
+      document.getElementById("createPlanBtn")?.addEventListener("click", ()=>{
+        go("#/plan");
       });
 
       document.getElementById("backToExam").addEventListener("click", () => go("#/exam"));
@@ -2616,25 +3030,43 @@
       state.achievements.first = solvedCount >= 1;
       state.achievements.three = solvedCount >= 3;
       state.achievements.five = solvedCount >= 5;
+      state.achievements.fifty = solvedCount >= 50;
+    }
+
+    function updateStreak() {
+      const today = new Date().toDateString();
+      if (!state.streak) state.streak = { lastDate: null, count: 0 };
+      if (state.streak.lastDate === today) return;
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const isYesterday = state.streak.lastDate === yesterday.toDateString();
+      if (isYesterday) {
+        state.streak.count++;
+      } else {
+        state.streak.count = 1;
+      }
+      state.streak.lastDate = today;
+      saveState(state);
     }
 
     function markSolved(taskId){
       if(state.solved[taskId]) return;
       state.solved[taskId] = true;
-      // Обновляем статистику
       const task = TASKS_INF.find(t => t.id === taskId);
       if (task) {
         const theme = THEMES_INF.find(t => t.taskIds.includes(task.id));
         if (theme) updateTopicStats(theme.id, true);
       }
+      updateStreak();
       recomputeAchievements();
       recomputeProgress();
       saveState(state);
 
       const solvedCount = TASKS_INF.filter(t => state.solved[t.id]).length;
-      if (solvedCount === 1) toast("🏆 Достижение!", "Первая пятёрка — открыто!", "ok");
-      if (solvedCount === 3) toast("🏆 Достижение!", "В ударе — решено 3 задания!", "ok");
-      if (solvedCount === 5) toast("🏆 Достижение!", "Ударник труда — решено 5 заданий!", "ok");
+      if (solvedCount === 1) { toast("🏆 Достижение!", "Первая пятёрка — открыто!", "ok"); addNotification("🏆 Достижение", "Первая пятёрка", "#/progress"); }
+      if (solvedCount === 3) { toast("🏆 Достижение!", "В ударе — решено 3 задания!", "ok"); addNotification("🏆 Достижение", "В ударе (3 задачи)", "#/progress"); }
+      if (solvedCount === 5) { toast("🏆 Достижение!", "Ударник труда — решено 5 заданий!", "ok"); addNotification("🏆 Достижение", "Ударник труда (5 задач)", "#/progress"); }
+      if (solvedCount === 50) { toast("🏆 Достижение!", "50 задач — круто!", "ok"); addNotification("🏆 Достижение", "50 задач решено!", "#/progress"); }
     }
 
     function updateTopicStats(topicId, correct) {
@@ -2645,7 +3077,6 @@
       saveState(state);
     }
 
-    // ---- РЕКОМЕНДАЦИИ (на основе статистики) ----
     function getRecommendations() {
       const stats = state.topicStats || {};
       const results = [];
@@ -2673,7 +3104,6 @@
         return { name: theme.name, solved, total, percent };
       });
 
-      // Рекомендации на основе статистики
       const recs = getRecommendations();
       let recText = "Вы отлично справляетесь! Продолжайте в том же духе.";
       if (recs.length) {
@@ -2688,6 +3118,7 @@
       if (solvedCount < 1) nextGoalText = "До «Первой пятёрки» решите 1 задание.";
       else if (solvedCount < 3) nextGoalText = `До «В ударе» осталось ${3 - solvedCount} задания.`;
       else if (solvedCount < 5) nextGoalText = `До «Ударник труда» осталось ${5 - solvedCount} задания.`;
+      else if (solvedCount < 50) nextGoalText = `До «50 задач» осталось ${50 - solvedCount} заданий.`;
       else nextGoalText = "Поздравляем! Все достижения получены! 🎉";
 
       $main.innerHTML = `
@@ -2707,15 +3138,16 @@
           <div class="divider"></div>
           <div class="kpi">
             <div class="card"><div class="val">${solvedCount}/${TASKS_INF.length}</div><div class="lab">Решено заданий</div></div>
-            <div class="card"><div class="val">${countUnread()}</div><div class="lab">Непрочитано</div></div>
+            <div class="card"><div class="val">${state.streak?.count || 0}</div><div class="lab">🔥 Серия дней</div></div>
           </div>
         </div>
 
-        <div class="section-title">Достижения <span class="chip">${a.first ? 1 : 0}/${a.three ? 2 : 0}/${a.five ? 3 : 0}</span></div>
+        <div class="section-title">Достижения <span class="chip">${a.first ? 1 : 0}/${a.three ? 2 : 0}/${a.five ? 3 : 0}/${a.fifty ? 4 : 0}</span></div>
         <div class="ach">
           ${achRow("Первая пятёрка", "Решить одно задание", a.first)}
           ${achRow("В ударе", "Решить 3 задания", a.three)}
           ${achRow("Ударник труда", "Решить 5 заданий", a.five)}
+          ${achRow("50 задач", "Решить 50 заданий", a.fifty)}
         </div>
         <div class="next-goal">${nextGoalText}</div>
 
@@ -2773,57 +3205,7 @@
       `;
     }
 
-    // ---- СООБЩЕНИЯ ----
-    function renderMessages(){
-      const unread = countUnread();
-      $main.innerHTML = `
-        <div class="card pad">
-          <div class="row">
-            <div>
-              <div style="font-weight:1100">Входящие</div>
-              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px">Непрочитано: <strong>${unread}</strong></div>
-            </div>
-            <button class="btn" id="markAll">Прочитать всё</button>
-          </div>
-        </div>
-        <div class="sp"></div>
-        <div class="list" aria-label="Сообщения">
-          ${state.messages.map(m => msgRow(m)).join("")}
-        </div>
-      `;
-
-      document.getElementById("markAll").addEventListener("click", ()=>{
-        for(const k in state.unreadMessages){ state.unreadMessages[k] = false; }
-        saveState(state);
-        toast("Готово", "Все сообщения прочитаны.", "ok");
-        route();
-      });
-
-      document.querySelectorAll("[data-msg]").forEach(el=>{
-        el.addEventListener("click", ()=>{
-          const id = el.getAttribute("data-msg");
-          state.unreadMessages[id] = false;
-          saveState(state);
-          toast("Открыто", "Сообщение отмечено как прочитанное.", "ok");
-          route();
-        });
-      });
-    }
-
-    function msgRow(m){
-      const unread = !!state.unreadMessages[m.id];
-      return `
-        <div class="card msg" data-msg="${m.id}">
-          <div class="row">
-            <div class="msg-title">${escapeHtml(m.title)}</div>
-            ${unread ? `<span class="dot" aria-label="Непрочитано"></span>` : `<span class="chip ok">прочитано</span>`}
-          </div>
-          <div class="msg-text">${escapeHtml(m.text)}</div>
-        </div>
-      `;
-    }
-
-    // ---- НАСТРОЙКИ ----
+    // ---- НАСТРОЙКИ (сброс только здесь) ----
     function renderSettings(){
       const theme = state.theme;
       $main.innerHTML = `
@@ -2838,10 +3220,18 @@
           <div class="divider"></div>
           <div class="row">
             <div>
-              <div style="font-weight:1100">Сбросить прогресс</div>
-              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px">Очистить все решённые задания</div>
+              <div style="font-weight:1100">Сбросить прогресс заданий</div>
+              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px">Очистить статусы решённых заданий, попытки, но сохранить избранное и ошибки</div>
             </div>
-            <button class="btn" id="resetBtn">Сброс</button>
+            <button class="btn" id="resetProgressBtn">Сбросить</button>
+          </div>
+          <div class="divider"></div>
+          <div class="row">
+            <div>
+              <div style="font-weight:1100">Полный сброс</div>
+              <div class="muted" style="font-weight:750;font-size:12.5px;margin-top:3px">Удалить всё: прогресс, достижения, избранное, ошибки</div>
+            </div>
+            <button class="btn" id="resetFullBtn">Сбросить всё</button>
           </div>
           <div class="divider"></div>
           <div class="row">
@@ -2874,19 +3264,43 @@
         route();
       });
 
-      document.getElementById("resetBtn").addEventListener("click", ()=>{
-        if(confirm("Сбросить прогресс и достижения?")){
-          const newState = structuredClone(DEFAULT_STATE);
-          newState.theme = document.body.classList.contains("theme-dark") ? "dark" : "light";
+      document.getElementById("resetProgressBtn").addEventListener("click", ()=>{
+        if (confirm("Сбросить прогресс по всем заданиям?\n\nБудут сброшены:\n• статус «Решено»\n• ответы пользователя\n• количество попыток\n• прогресс тем\n\nНе будут удалены:\n• избранное\n• мои ошибки\n• достижения")) {
+          const newState = structuredClone(state);
+          newState.solved = {};
+          TASKS_INF.forEach(t => newState.solved[t.id] = false);
+          newState.attempts = {};
+          newState.topicStats = {};
+          newState.subjects = state.subjects.map(s => ({ ...s, progress: 0 }));
+          newState.favorites = state.favorites;
+          newState.mistakes = state.mistakes;
+          newState.achievements = state.achievements;
           state = newState;
           saveState(state);
-          toast("Сброс", "Прогресс очищен.", "ok");
+          toast("Сброшено", "Прогресс заданий очищен", "ok");
+          route();
+        }
+      });
+
+      document.getElementById("resetFullBtn").addEventListener("click", ()=>{
+        if (confirm("Вы уверены? Будут удалены все данные, включая достижения, избранное и ошибки.")) {
+          const newState = structuredClone(DEFAULT_STATE);
+          newState.theme = document.body.classList.contains("theme-dark") ? "dark" : "light";
+          newState.isDemo = state.isDemo;
+          state = newState;
+          saveState(state);
+          toast("Сброс выполнен", "Все данные удалены", "ok");
           route();
         }
       });
 
       document.getElementById("logoutBtn").addEventListener("click", ()=>{
         clearAuth();
+        if (state.isDemo) {
+          state = structuredClone(DEFAULT_STATE);
+          state.isDemo = false;
+          saveState(state);
+        }
         toast("Выход", "Сессия завершена.", "ok");
         setTimeout(()=> route(), 350);
       });
@@ -2897,6 +3311,8 @@
     // =========================================================
     let currentTrainingTask = null;
     let currentTopic = null;
+    let reviewingMistakeId = null;
+    let reviewingMistakesQueue = [];
 
     function renderTrainingTopicSelector() {
       $main.innerHTML = `
@@ -2911,7 +3327,7 @@
         </div>
         ${state.mistakes.length > 0 ? `
           <div class="divider"></div>
-          <button class="btn primary full" id="repeatMistakesBtn">🔄 Повторить ошибки (${state.mistakes.length})</button>
+          <button class="btn primary full" id="repeatMistakesBtn">🔄 Повторить все ошибки (${state.mistakes.length})</button>
         ` : ''}
       `;
       document.querySelectorAll("[data-topic]").forEach(el => {
@@ -2924,6 +3340,8 @@
 
     function startTraining(topicId) {
       currentTopic = topicId;
+      reviewingMistakeId = null;
+      reviewingMistakesQueue = [];
       generateNewTask();
       renderTrainingUI();
     }
@@ -2941,7 +3359,36 @@
         return;
       }
       const task = currentTrainingTask;
+      if (!window._trainingAttempts) window._trainingAttempts = {};
+      const taskKey = task.text;
+      const sessionAttempts = window._trainingAttempts[taskKey] || 0;
+      const canShowSolution = sessionAttempts >= 3;
+
+      // Подсчёт прогресса исправления ошибок
+      const review = state.mistakeReview;
+      let progressHtml = '';
+      if (review && review.total > 0) {
+        const fixed = review.fixed || 0;
+        const total = review.total;
+        const remaining = total - fixed;
+        const percent = total > 0 ? Math.round((fixed / total) * 100) : 0;
+        progressHtml = `
+          <div class="mistake-progress">
+            <div class="row"><span>⚠️ Работа над ошибками</span></div>
+            <div class="row">
+              <span>Исправлено: <strong>${fixed}</strong></span>
+              <span>Осталось: <strong>${remaining}</strong></span>
+              <span>Всего ошибок: <strong>${total}</strong></span>
+            </div>
+            <div class="bar" style="background:color-mix(in srgb, var(--border) 50%, transparent);"><i style="width:${percent}%; background:var(--success);"></i></div>
+          </div>
+        `;
+      }
+
+      const hasNextMistake = reviewingMistakesQueue.length > 0;
+
       $main.innerHTML = `
+        ${progressHtml}
         <div class="card pad">
           <div class="section-title">Тренировка · ${TRAINING_TOPICS.find(t=>t.id===currentTopic)?.name}</div>
           <div class="q-text" style="font-size:15px; margin-bottom:16px;">${escapeHtml(task.text)}</div>
@@ -2949,9 +3396,9 @@
           <input class="input" id="trainAnswer" placeholder="Введите ответ" autocomplete="off">
           <div class="row" style="margin-top:12px; gap:10px;flex-wrap:wrap;">
             <button class="btn primary" id="checkTrainBtn">Проверить</button>
-            <button class="btn" id="nextTrainBtn">➡️ Следующая</button>
-            <button class="btn ghost" id="hintTrainBtn">Подсказка</button>
-            <button class="btn ghost" id="solutionTrainBtn">📘 Решение</button>
+            <button class="btn" id="nextTrainBtn">${hasNextMistake ? '⏩ Следующая ошибка' : '➡️ Следующая'}</button>
+            <button class="btn ghost" id="hintTrainBtn">💡 Подсказка</button>
+            <button class="btn ghost" id="solutionTrainBtn" style="display:${canShowSolution ? 'inline-flex' : 'none'};">📖 Решение</button>
           </div>
           <div class="hint" id="trainHint">${escapeHtml(task.explanation)}</div>
           <div id="trainSolutionBox" style="display:none;margin-top:10px;">
@@ -2967,34 +3414,114 @@
       document.getElementById("checkTrainBtn").onclick = () => {
         const userAns = document.getElementById("trainAnswer").value.trim().replace(',','.').toLowerCase();
         const correct = String(task.answer).toLowerCase();
-        const userNormalized = userAns;
-        const correctNormalized = correct;
-        if (userNormalized === correctNormalized) {
-          toast("Верно!", "Отлично", "ok");
+        if (userAns === correct) {
+          toast("✅ Верно!", "Отлично", "ok");
           updateTopicStats(currentTopic, true);
+          document.getElementById("trainSolutionBox").style.display = "block";
+          document.getElementById("solutionTrainBtn").style.display = "inline-flex";
+          document.getElementById("trainHint").classList.remove("show");
+          // Если это была ошибка
+          if (reviewingMistakeId) {
+            // Увеличиваем счётчик исправленных
+            if (state.mistakeReview) {
+              state.mistakeReview.fixed = (state.mistakeReview.fixed || 0) + 1;
+              saveState(state);
+            }
+            removeMistakeById(reviewingMistakeId);
+            toast("Ошибка исправлена ✅", "", "ok");
+            reviewingMistakeId = null;
+
+            if (reviewingMistakesQueue.length > 0) {
+              const nextMistake = reviewingMistakesQueue.shift();
+              reviewingMistakeId = nextMistake.id;
+              currentTopic = nextMistake.topicId;
+              currentTrainingTask = {
+                text: nextMistake.question,
+                answer: nextMistake.correctAnswer,
+                explanation: nextMistake.explanation,
+                topicId: nextMistake.topicId
+              };
+              window._trainingAttempts = {};
+              renderTrainingUI();
+              toast("Переход к следующей ошибке", `Осталось ${reviewingMistakesQueue.length}`, "ok");
+            } else {
+              // Все ошибки исправлены
+              const review = state.mistakeReview;
+              const elapsed = Math.floor((Date.now() - review.startTime) / 1000);
+              const minutes = Math.floor(elapsed / 60);
+              const seconds = elapsed % 60;
+              const timeStr = minutes > 0 ? `${minutes} минут ${seconds} секунд` : `${seconds} секунд`;
+              // Показываем экран завершения
+              showMistakeComplete(timeStr);
+            }
+          }
         } else {
-          addMistake(currentTopic, task.text, task.answer, task.explanation, userAns);
+          const newAttempts = (window._trainingAttempts[taskKey] || 0) + 1;
+          window._trainingAttempts[taskKey] = newAttempts;
+          toast("❌ Неверно", "Ошибка записана в раздел «Мои ошибки»", "bad");
           document.getElementById("trainAnswer").classList.add("input-error");
           updateTopicStats(currentTopic, false);
-          toast("Ошибка записана", "В раздел «Мои ошибки»", "bad");
+          if (!reviewingMistakeId) {
+            // Добавляем ошибку, но если она уже есть, увеличиваем счётчик
+            addMistake(currentTopic, task.text, task.answer, task.explanation, userAns);
+          } else {
+            // Увеличиваем счётчик попыток у существующей ошибки
+            const mistake = state.mistakes.find(m => m.id === reviewingMistakeId);
+            if (mistake) {
+              mistake.mistakeAttempts = (mistake.mistakeAttempts || 1) + 1;
+              saveState(state);
+            }
+          }
+          if (newAttempts >= 3) {
+            document.getElementById("solutionTrainBtn").style.display = "inline-flex";
+            toast("3 ошибки", "Теперь можно посмотреть решение.", "ok");
+          }
+          if (newAttempts >= 3) {
+            document.getElementById("trainSolutionBox").style.display = "block";
+            document.getElementById("trainHint").classList.remove("show");
+          }
         }
-        // Показываем решение
-        document.getElementById("trainSolutionBox").style.display = "block";
       };
 
-      document.getElementById("nextTrainBtn").onclick = () => { generateNewTask(); renderTrainingUI(); };
+      document.getElementById("nextTrainBtn").onclick = () => {
+        if (reviewingMistakesQueue.length > 0) {
+          const nextMistake = reviewingMistakesQueue.shift();
+          reviewingMistakeId = nextMistake.id;
+          currentTopic = nextMistake.topicId;
+          currentTrainingTask = {
+            text: nextMistake.question,
+            answer: nextMistake.correctAnswer,
+            explanation: nextMistake.explanation,
+            topicId: nextMistake.topicId
+          };
+          window._trainingAttempts = {};
+          renderTrainingUI();
+          return;
+        }
+        window._trainingAttempts = {};
+        generateNewTask();
+        renderTrainingUI();
+      };
+
       document.getElementById("hintTrainBtn").onclick = () => {
         document.getElementById("trainHint").classList.toggle("show");
         document.getElementById("trainSolutionBox").style.display = "none";
       };
+
       document.getElementById("solutionTrainBtn").onclick = () => {
         const box = document.getElementById("trainSolutionBox");
         box.style.display = box.style.display === "none" ? "block" : "none";
         document.getElementById("trainHint").classList.remove("show");
       };
+
       document.getElementById("backTopicsBtn").onclick = () => {
         currentTopic = null;
         currentTrainingTask = null;
+        reviewingMistakeId = null;
+        reviewingMistakesQueue = [];
+        window._trainingAttempts = {};
+        state.mistakeReview = null;
+        saveState(state);
         renderTrainingTopicSelector();
       };
     }
@@ -3005,57 +3532,130 @@
         toast("Нет ошибок", "Все задания решены верно! 🎉", "ok");
         return;
       }
-      const mistake = state.mistakes[0];
-      currentTopic = mistake.topicId;
-      currentTrainingTask = {
-        text: mistake.question,
-        answer: mistake.correctAnswer,
-        explanation: mistake.explanation,
-        topicId: mistake.topicId
+      // Создаём запись о работе над ошибками
+      state.mistakeReview = {
+        total: state.mistakes.length,
+        fixed: 0,
+        startTime: Date.now()
       };
-      renderTrainingUI();
-      // Удаляем эту ошибку после показа
-      state.mistakes.shift();
       saveState(state);
-      toast("Повтор ошибок", `Осталось ${state.mistakes.length} ошибок`, "ok");
+
+      reviewingMistakesQueue = state.mistakes.slice();
+      const first = reviewingMistakesQueue.shift();
+      reviewingMistakeId = first.id;
+      currentTopic = first.topicId;
+      currentTrainingTask = {
+        text: first.question,
+        answer: first.correctAnswer,
+        explanation: first.explanation,
+        topicId: first.topicId
+      };
+      window._trainingAttempts = {};
+      renderTrainingUI();
+      toast("Повтор ошибок", `Осталось ${reviewingMistakesQueue.length + 1} ошибок`, "ok");
     }
 
+    function removeMistakeById(id) {
+      state.mistakes = state.mistakes.filter(m => m.id !== id);
+      saveState(state);
+    }
+
+    // ---- ЭКРАН ЗАВЕРШЕНИЯ РАБОТЫ НАД ОШИБКАМИ ----
+    function showMistakeComplete(timeStr) {
+      const total = state.mistakeReview?.total || 0;
+      $main.innerHTML = `
+        <div class="card pad complete-screen">
+          <div class="big-icon">🎉</div>
+          <h2>Отлично!</h2>
+          <p>Все ошибки исправлены.</p>
+          <div style="margin:16px 0;">
+            <div>Исправлено ошибок: <strong>${total}</strong></div>
+            <div>Потрачено времени: <strong>${timeStr}</strong></div>
+          </div>
+          <button class="btn primary" style="margin:8px;" id="toSubjectsBtn">Перейти к предметам</button>
+          <button class="btn" style="margin:8px;" id="toTrainingBtn">Начать тренировку</button>
+        </div>
+      `;
+      document.getElementById("toSubjectsBtn").addEventListener("click", ()=>{
+        state.mistakeReview = null;
+        saveState(state);
+        go("#/subjects");
+      });
+      document.getElementById("toTrainingBtn").addEventListener("click", ()=>{
+        state.mistakeReview = null;
+        saveState(state);
+        go("#/subject/inf?tab=training");
+      });
+    }
+
+    // ---- РАЗДЕЛ МОИ ОШИБКИ (обновлённый) ----
     function renderMistakesList() {
       if (!state.mistakes.length) {
+        // Проверяем, не был ли только что завершён процесс
+        if (state.mistakeReview && state.mistakeReview.total > 0) {
+          // Если есть запись о работе, но ошибок нет - показываем завершение
+          const elapsed = Math.floor((Date.now() - state.mistakeReview.startTime) / 1000);
+          const minutes = Math.floor(elapsed / 60);
+          const seconds = elapsed % 60;
+          const timeStr = minutes > 0 ? `${minutes} минут ${seconds} секунд` : `${seconds} секунд`;
+          showMistakeComplete(timeStr);
+          return;
+        }
         $main.innerHTML = `<div class="card pad muted">Пока нет ошибок. Пройдите тренировку, и неправильные ответы появятся здесь.</div>`;
         return;
       }
 
-      // Группировка по темам
       const grouped = {};
       state.mistakes.forEach(m => {
         if (!grouped[m.topicId]) grouped[m.topicId] = [];
         grouped[m.topicId].push(m);
       });
 
+      const totalMistakes = state.mistakes.length;
+
+      // Строим строку сгруппированных тем
+      const topicRows = Object.entries(grouped).map(([topicId, items]) => {
+        const topicName = TRAINING_TOPICS.find(t=>t.id===topicId)?.name || topicId;
+        return `${topicName} (${items.length})`;
+      }).join(' · ');
+
       $main.innerHTML = `
-        <div class="section-title">⚠️ Мои ошибки (${state.mistakes.length})</div>
+        <div class="section-title">⚠️ Мои ошибки</div>
+        <div class="card pad" style="margin-bottom:12px;">
+          <div>Всего ошибок: <strong>${totalMistakes}</strong></div>
+          <div style="font-size:13px; color:var(--muted);">${topicRows}</div>
+        </div>
         <button class="btn primary full" style="margin-bottom:12px;" id="reviewAllMistakes">🔄 Повторить все ошибки</button>
         <div class="list">
           ${Object.entries(grouped).map(([topicId, items]) => {
             const topicName = TRAINING_TOPICS.find(t=>t.id===topicId)?.name || topicId;
             return `
               <div class="card" style="padding:12px;">
-                <div style="font-weight:1100;font-size:15px;">${escapeHtml(topicName)} (${items.length})</div>
-                ${items.map(m => `
-                  <div style="margin-top:8px;padding:8px;border-radius:var(--radius-md);border:1px solid var(--border);">
-                    <div style="font-weight:800;font-size:13px;">${escapeHtml(m.question)}</div>
-                    <div class="row" style="margin-top:4px;">
-                      <span class="chip bad">Ваш: ${escapeHtml(m.userAnswer)}</span>
-                      <span class="chip ok">Верно: ${escapeHtml(m.correctAnswer)}</span>
-                      <button class="btn small" data-retry="${m.id}">🔁</button>
-                      <button class="btn small ghost" data-delete="${m.id}">🗑️</button>
+                <div style="font-weight:1100;font-size:15px;display:flex;justify-content:space-between;align-items:center;">
+                  <span>${escapeHtml(topicName)} (${items.length})</span>
+                  <button class="btn small" data-repeat-topic="${topicId}">Повторить тему</button>
+                </div>
+                ${items.map(m => {
+                  const attempts = m.mistakeAttempts || 1;
+                  return `
+                    <div style="margin-top:8px;padding:8px;border-radius:var(--radius-md);border:1px solid var(--border);">
+                      <div style="font-weight:800;font-size:13px;">${escapeHtml(m.question)}</div>
+                      <div class="row" style="margin-top:4px;">
+                        <span class="chip bad">Ваш: ${escapeHtml(m.userAnswer)}</span>
+                        <span class="chip ok">Верно: ${escapeHtml(m.correctAnswer)}</span>
+                        <span class="chip">Ошибок: ${attempts}</span>
+                      </div>
+                      <div class="row" style="margin-top:6px;">
+                        <button class="btn small" data-retry="${m.id}">🔁</button>
+                        <button class="btn small" data-theory="${m.topicId}">📖 Теория</button>
+                        <button class="btn small ghost" data-delete="${m.id}">🗑️</button>
+                      </div>
+                      <div style="margin-top:6px;padding:6px;background:color-mix(in srgb, var(--brand) 6%, var(--surface));border-radius:10px;font-size:12px;">
+                        ${escapeHtml(m.explanation)}
+                      </div>
                     </div>
-                    <div style="margin-top:6px;padding:6px;background:color-mix(in srgb, var(--brand) 6%, var(--surface));border-radius:10px;font-size:12px;">
-                      ${escapeHtml(m.explanation)}
-                    </div>
-                  </div>
-                `).join('')}
+                  `;
+                }).join('')}
               </div>
             `;
           }).join('')}
@@ -3066,14 +3666,41 @@
         startMistakesReview();
       });
 
+      document.querySelectorAll("[data-repeat-topic]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const topicId = btn.getAttribute("data-repeat-topic");
+          const mistakes = state.mistakes.filter(m => m.topicId === topicId);
+          if (mistakes.length === 0) return;
+          // Запускаем повтор только ошибок этой темы
+          reviewingMistakesQueue = mistakes.slice();
+          const first = reviewingMistakesQueue.shift();
+          reviewingMistakeId = first.id;
+          currentTopic = topicId;
+          currentTrainingTask = {
+            text: first.question,
+            answer: first.correctAnswer,
+            explanation: first.explanation,
+            topicId: topicId
+          };
+          window._trainingAttempts = {};
+          // Создаём запись о работе
+          state.mistakeReview = {
+            total: mistakes.length,
+            fixed: 0,
+            startTime: Date.now()
+          };
+          saveState(state);
+          renderTrainingUI();
+          toast("Повтор темы", `Тема: ${TRAINING_TOPICS.find(t=>t.id===topicId)?.name}`, "ok");
+        });
+      });
+
       document.querySelectorAll("[data-retry]").forEach(btn => {
         btn.onclick = () => {
           const id = btn.getAttribute("data-retry");
           const mistake = state.mistakes.find(m => m.id == id);
           if (mistake) {
-            const idx = state.mistakes.indexOf(mistake);
-            state.mistakes.splice(idx, 1);
-            saveState(state);
+            reviewingMistakeId = id;
             currentTopic = mistake.topicId;
             currentTrainingTask = {
               text: mistake.question,
@@ -3081,9 +3708,24 @@
               explanation: mistake.explanation,
               topicId: mistake.topicId
             };
+            window._trainingAttempts = {};
+            // Создаём запись о работе (только одна ошибка)
+            state.mistakeReview = {
+              total: 1,
+              fixed: 0,
+              startTime: Date.now()
+            };
+            saveState(state);
             renderTrainingUI();
           }
         };
+      });
+
+      document.querySelectorAll("[data-theory]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const topicId = btn.getAttribute("data-theory");
+          openTheoryByTheme(topicId);
+        });
       });
 
       document.querySelectorAll("[data-delete]").forEach(btn => {
@@ -3097,14 +3739,29 @@
       });
     }
 
+    // ---- УЛУЧШЕННАЯ addMistake (с учётом дубликатов) ----
     function addMistake(topicId, question, correctAnswer, explanation, userAnswer) {
+      // Проверяем, есть ли уже такая ошибка (по вопросу)
+      const existing = state.mistakes.find(m => m.question === question);
+      if (existing) {
+        // Увеличиваем счётчик попыток
+        existing.mistakeAttempts = (existing.mistakeAttempts || 1) + 1;
+        // Обновляем последний неверный ответ
+        existing.userAnswer = userAnswer;
+        saveState(state);
+        return;
+      }
       state.mistakes.unshift({
         id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
         topicId, question, correctAnswer, explanation, userAnswer,
-        date: new Date().toLocaleString()
+        date: new Date().toLocaleString(),
+        mistakeAttempts: 1 // счётчик ошибок для этой записи
       });
       if (state.mistakes.length > 100) state.mistakes.pop();
       saveState(state);
+      const topic = TRAINING_TOPICS.find(t => t.id === topicId);
+      const topicName = topic ? topic.name : topicId;
+      addNotification("❌ Ошибка записана", `Тема: ${topicName}`, "#/subject/inf?tab=mistakes");
     }
 
     // =========================================================
@@ -3112,6 +3769,8 @@
     // =========================================================
     if(!location.hash) location.hash = "#/home";
     route();
+    setTimeout(checkAbsence, 1000);
+    updateBellBadge();
   </script>
 </body>
 </html>
