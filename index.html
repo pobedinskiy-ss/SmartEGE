@@ -9,6 +9,7 @@
     /* =========================================================
       SmartЕГЭ — полная версия с тренировкой и ошибками
       Все оригинальные стили сохранены.
+      Добавлены явные цвета для тёмной темы.
     ========================================================== */
 
     :root{
@@ -149,12 +150,14 @@
       cursor:pointer;
       transition: transform .12s ease, background .2s ease, border-color .2s ease;
       user-select:none;
+      color: var(--text);  /* для тёмной темы */
     }
     .icon-btn:active{ transform: scale(.97); }
     .icon{
       width: 20px;
       height: 20px;
       display:block;
+      stroke: currentColor; /* для иконок */
     }
 
     .badge{
@@ -251,6 +254,7 @@
       gap: 10px;
       transition: transform .12s ease, background .2s ease, border-color .2s ease;
       user-select:none;
+      color: var(--text);
     }
     .btn:active{ transform: scale(.98); }
     .btn.primary{
@@ -277,7 +281,7 @@
       background: color-mix(in srgb, var(--surface-2) 70%, transparent);
       font-size: 12px;
       font-weight: 800;
-      color: var(--muted);
+      color: var(--text);  /* для тёмной темы */
       white-space:nowrap;
     }
     .chip.ok{ color: var(--success); border-color: color-mix(in srgb, var(--success) 22%, var(--border)); background: color-mix(in srgb, var(--success) 10%, var(--surface)); }
@@ -524,6 +528,7 @@
       border-radius: 999px;
       border: 1px solid var(--border);
       background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+      color: var(--text); /* для тёмной темы */
     }
     .input{
       width:100%;
@@ -536,6 +541,7 @@
       font-weight: 800;
       outline:none;
       transition: border-color .2s ease, box-shadow .2s ease;
+      color: var(--text); /* для тёмной темы */
     }
     .input:focus{
       border-color: color-mix(in srgb, var(--brand) 40%, var(--border));
@@ -1144,7 +1150,10 @@
     const DEFAULT_STATE = {
       theme: "light",
       subjects: [
-        { id: "inf",  name: "Информатика", icon: "💻", progress: 0 }
+        { id: "inf",  name: "Информатика", icon: "💻", progress: 0 },
+        { id: "math_base", name: "Математика (база)", icon: "📐", progress: 0, locked: true },
+        { id: "phys", name: "Физика", icon: "⚛️", progress: 0, locked: true },
+        { id: "math_prof", name: "Математика (профиль)", icon: "📊", progress: 0, locked: true }
       ],
       solved: (() => {
         const solved = {};
@@ -1353,13 +1362,7 @@
       }
 
       if(r1 === "exam" && r2 === "start"){
-        const qs = new URLSearchParams((location.hash.split("?")[1]||""));
-        const subject = qs.get("subject");
-        if (subject === "inf") {
-          startExam(subject);
-        } else {
-          go("#/exam");
-        }
+        renderExamCurrent();
         return;
       }
 
@@ -1447,6 +1450,15 @@
         </div>
       `;
       hydrateProgressBars();
+
+      // ======== ДОБАВЛЕННАЯ ЧАСТЬ ========
+      // Обработка кликов по предметам-заглушкам (без data-open)
+      document.querySelectorAll(".subject:not([data-open])").forEach(el => {
+        el.addEventListener("click", () => {
+          toast("Скоро", "Этот предмет появится в следующем обновлении.", "bad");
+        });
+      });
+      // ===================================
     }
 
     function subjectCard(s, clickable){
@@ -1499,6 +1511,9 @@
       document.getElementById("tabPractice").addEventListener("click", ()=> go("#/subject/inf?tab=practice"));
       document.getElementById("tabTraining").addEventListener("click", ()=> go("#/subject/inf?tab=training"));
       document.getElementById("tabMistakes").addEventListener("click", ()=> go("#/subject/inf?tab=mistakes"));
+
+      // Добавляем обработчик для кнопки "К практике" в теории
+      document.getElementById("toPracticeInf")?.addEventListener("click", ()=> go("#/subject/inf?tab=practice"));
 
       if(tab === "practice") {
         document.querySelectorAll("[data-theme-filter-inf]").forEach(el=>{
@@ -1793,6 +1808,10 @@
         }else{
           toast("Неверно", "Попробуй снова или нажми «Подсказка».", "bad");
           $answer.classList.add("input-error");
+          // Добавляем ошибку в раздел "Мои ошибки"
+          const topic = THEMES_INF.find(t => t.taskIds.includes(task.id));
+          const topicId = topic ? topic.id : 'unknown';
+          addMistake(topicId, task.prompt, task.answer, task.hint, $answer.value);
         }
       });
 
