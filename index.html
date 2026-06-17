@@ -194,8 +194,8 @@
       border-top: 1px solid var(--border);
       padding: 8px 10px 12px;
       display:grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 2px;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
       position:absolute;
       left:0; right:0; bottom:0;
       z-index: 6;
@@ -204,20 +204,20 @@
     }
     .tab{
       height: 56px;
-      border-radius: 18px;
+      border-radius: 14px;
       border: 1px solid transparent;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      gap: 2px;
+      gap: 1px;
       cursor:pointer;
       user-select:none;
       transition: transform .12s ease, background .2s ease, border-color .2s ease;
       color: var(--muted);
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 800;
-      letter-spacing: .2px;
+      letter-spacing: .1px;
     }
     .tab:hover{ background: color-mix(in srgb, var(--surface-2) 70%, transparent); }
     .tab:active{ transform: scale(.98); }
@@ -226,8 +226,8 @@
       border-color: color-mix(in srgb, var(--brand) 30%, var(--border));
       color: var(--text);
     }
-    .tab .tab-ico{ font-size: 20px; line-height: 1; }
-    .tab .tab-label{ font-size: 9px; font-weight: 800; letter-spacing: .2px; }
+    .tab .tab-ico{ font-size: 18px; line-height: 1; }
+    .tab .tab-label{ font-size: 8px; font-weight: 800; letter-spacing: .1px; }
 
     .card{
       background: var(--surface);
@@ -877,6 +877,39 @@
     }
     .complete-screen .big-icon{font-size:64px;}
 
+    /* Достижения */
+    .achievement-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .ach-card{
+      padding:16px;
+      border-radius:var(--radius-lg);
+      border:2px solid var(--border);
+      text-align:center;
+      transition:all .2s ease;
+    }
+    .ach-card.unlocked{
+      border-color:var(--success);
+      background:color-mix(in srgb, var(--success) 8%, var(--surface));
+    }
+    .ach-card .ach-icon{font-size:36px;}
+    .ach-card .ach-name{font-weight:1100;font-size:14px;margin:4px 0;}
+    .ach-card .ach-desc{font-size:12px;color:var(--muted);}
+    .ach-card .ach-progress{
+      margin-top:8px;
+      height:6px;
+      border-radius:999px;
+      background:color-mix(in srgb, var(--border) 50%, transparent);
+    }
+    .ach-card .ach-progress i{
+      display:block;
+      height:100%;
+      border-radius:999px;
+      background:var(--brand);
+    }
+
     @media (max-width: 360px) {
       .phone { width: 100vw; height: 100vh; border-radius: 0; border: none; }
       .phone::before { display: none; }
@@ -888,8 +921,9 @@
       .subject { padding: 10px; }
       .task .meta { min-width: 80px; }
       .timer { padding: 4px 8px; font-size: 11px; }
-      .tab .tab-label { font-size: 8px; }
+      .tab .tab-label { font-size: 7px; }
       .home-stats{grid-template-columns:1fr 1fr;}
+      .achievement-grid{grid-template-columns:1fr;}
     }
 
     @media (max-width: 480px) {
@@ -925,6 +959,10 @@
           <span class="tab-ico">📅</span>
           <span class="tab-label">План</span>
         </div>
+        <div class="tab" data-tab="achievements" role="button" aria-label="Достижения">
+          <span class="tab-ico">🏆</span>
+          <span class="tab-label">Достижения</span>
+        </div>
         <div class="tab" data-tab="settings" role="button" aria-label="Настройки">
           <span class="tab-ico">⚙️</span>
           <span class="tab-label">Настройки</span>
@@ -938,17 +976,18 @@
     // =========================================================
     // 1) Состояние приложения (localStorage + sessionStorage)
     // =========================================================
-    const LS_KEY = "smartege_state_v12";
+    const LS_KEY = "smartege_state_v13";
     const AUTH_KEY = "smartege_auth_v1";
+    const TASKS_KEY = "smartege_tasks_v1";
 
-    // ----- ИНФОРМАТИКА: ПОЛНЫЙ НАБОР ЗАДАНИЙ (27+ заданий, все реальные) -----
+    // ----- ИНФОРМАТИКА: БАЗОВЫЕ ТЕМЫ (для группировки) -----
     const THEMES_INF = [
-      { id: "coding", name: "Кодирование информации", taskIds: ["inf-1","inf-2","inf-3","inf-7","inf-11","inf-24","inf-25"] },
-      { id: "logic", name: "Алгебра логики", taskIds: ["inf-4","inf-15","inf-26"] },
-      { id: "systems", name: "Системы счисления", taskIds: ["inf-6","inf-8","inf-14","inf-18","inf-27"] },
-      { id: "graphs", name: "Графы и сети", taskIds: ["inf-9","inf-13","inf-19"] },
-      { id: "algorithms", name: "Алгоритмы", taskIds: ["inf-10","inf-12","inf-16","inf-20","inf-21","inf-23"] },
-      { id: "programming", name: "Программирование", taskIds: ["inf-17","inf-22"] }
+      { id: "coding", name: "Кодирование информации" },
+      { id: "logic", name: "Алгебра логики" },
+      { id: "systems", name: "Системы счисления" },
+      { id: "graphs", name: "Графы и сети" },
+      { id: "algorithms", name: "Алгоритмы" },
+      { id: "programming", name: "Программирование" }
     ];
 
     const THEORY_INF = {
@@ -1062,190 +1101,506 @@
       <b>Динамическое программирование</b> — метод решения сложных задач путём разбиения их на подзадачи. Часто используется для задач на количество вариантов.`
     };
 
-    // ---- ПОЛНЫЙ СПИСОК ЗАДАНИЙ (27+ реальных заданий) ----
-    const TASKS_INF = [
-      // Кодирование
-      { id: "inf-1", themeId: "coding", title: "Задание 1 (ФИПИ)", diff: "Легко", diffType: "ok",
-        prompt: "Найдите значение выражения 8E₁₆ - 8B₁₆. Ответ запишите в десятичной системе счисления.",
-        answer: "3",
-        hint: "8E₁₆ = 8·16 + 14 = 142; 8B₁₆ = 8·16 + 11 = 139; разность = 3.",
-        solution: "Шаг 1: Переводим 8E₁₆ в десятичную: 8·16 + 14 = 142.\nШаг 2: Переводим 8B₁₆ в десятичную: 8·16 + 11 = 139.\nШаг 3: Вычитаем: 142 - 139 = 3.\nОтвет: 3."
-      },
-      { id: "inf-2", themeId: "coding", title: "Задание 2 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Для кодирования букв А, Б, В, Г решили использовать неравномерный двоичный код, удовлетворяющий условию Фано. Для буквы А использовали кодовое слово 0, для буквы Б — 110. Какова наименьшая возможная суммарная длина всех четырёх кодовых слов?",
-        answer: "9",
-        hint: "Строим дерево: А=0, Б=110. Свободны коды: 10, 111. Можно взять В=10 (длина 2), Г=111 (длина 3). Сумма = 1+3+2+3=9.",
-        solution: "Шаг 1: А=0 (длина 1), Б=110 (длина 3).\nШаг 2: Строим дерево кодов. Свободные вершины: 10 (длина 2) и 111 (длина 3).\nШаг 3: Берём В=10, Г=111.\nШаг 4: Сумма длин: 1+3+2+3=9.\nОтвет: 9."
-      },
-      { id: "inf-3", themeId: "coding", title: "Задание 3 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "На вход алгоритма подаётся натуральное число N. Алгоритм строит по нему новое число R следующим образом: 1) Строится двоичная запись числа N. 2) К этой записи дописывается справа бит чётности (сумма цифр по модулю 2). Полученная запись является двоичной записью искомого числа R. Укажите минимальное число N, при котором R > 60.",
-        answer: "31",
-        hint: "Для N=31: 11111₂ → бит чётности 1 → 111111₂ = 63 > 60.",
-        solution: "Шаг 1: Перебираем N.\nШаг 2: N=30: 11110₂ → бит чётности 0 → 111100₂ = 60 (не подходит).\nШаг 3: N=31: 11111₂ → бит чётности 1 → 111111₂ = 63 > 60.\nОтвет: 31."
-      },
-      // Логика
-      { id: "inf-4", themeId: "logic", title: "Задание 4 (ФИПИ)", diff: "Легко", diffType: "ok",
-        prompt: "Логическая функция F задаётся выражением (x ∧ ¬y) ∨ (z ∧ y). Определите, какому столбцу соответствует переменная x в таблице истинности. В ответе введите номер столбца (1, 2 или 3).",
-        answer: "1",
-        hint: "Постройте таблицу истинности и сравните с заданными значениями.",
-        solution: "Шаг 1: Строим таблицу истинности для x,y,z.\nШаг 2: Вычисляем (x∧¬y)∨(z∧y).\nШаг 3: Сравниваем столбцы с таблицей из условия.\nШаг 4: x соответствует 1-му столбцу.\nОтвет: 1."
-      },
-      // Системы счисления
-      { id: "inf-6", themeId: "systems", title: "Задание 6 (ФИПИ)", diff: "Легко", diffType: "ok",
-        prompt: "Сколько единиц в двоичной записи числа 145?",
-        answer: "4",
-        hint: "145₁₀ = 128 + 16 + 1 = 10010001₂ → 4 единицы.",
-        solution: "Шаг 1: 145 = 128 + 16 + 1.\nШаг 2: В двоичной системе: 128 = 2⁷, 16 = 2⁴, 1 = 2⁰.\nШаг 3: 145₁₀ = 10010001₂.\nШаг 4: Считаем единицы: 1+1+1+1 = 4.\nОтвет: 4."
-      },
-      { id: "inf-7", themeId: "coding", title: "Задание 7 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Музыкальный фрагмент был оцифрован и записан в виде файла без сжатия. Файл был передан в город А за 30 секунд. Затем фрагмент оцифрован повторно с разрешением в 2 раза выше и частотой дискретизации в 1,5 раза выше. Полученный файл передан в город Б за 15 секунд. Во сколько раз скорость передачи в город Б выше скорости передачи в город А?",
-        answer: "6",
-        hint: "Объём файла пропорционален разрешению и частоте. V₂/V₁ = 2·1,5 = 3. Скорость v₂/v₁ = (V₂/15)/(V₁/30) = 3·30/15 = 6.",
-        solution: "Шаг 1: V₁ = k·f·t₁ (исходный файл).\nШаг 2: V₂ = 2k·1,5f·t₂ = 3k·f·t₂.\nШаг 3: v₁ = V₁/30, v₂ = V₂/15.\nШаг 4: v₂/v₁ = (3k·f·t₂/15) / (k·f·t₁/30) = 3·30/15 = 6.\nОтвет: 6."
-      },
-      // Системы счисления (продолжение)
-      { id: "inf-8", themeId: "systems", title: "Задание 8 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Все 5-буквенные слова, составленные из букв А, О, У, записаны в алфавитном порядке. Начало: 1. ААААА 2. ААААО 3. ААААУ 4. АААОА ... Запишите слово, которое стоит на 150-м месте.",
-        answer: "ОУООУ",
-        hint: "Система счисления с основанием 3. А→0, О→1, У→2. 149₁₀ = 12112₃ → ОУООУ.",
-        solution: "Шаг 1: А→0, О→1, У→2 (основание 3).\nШаг 2: 150-е место → 149₁₀.\nШаг 3: 149 = 1·81 + 2·27 + 1·9 + 1·3 + 2·1 = 12112₃.\nШаг 4: 1→О, 2→У, 1→О, 1→О, 2→У → ОУООУ.\nОтвет: ОУООУ."
-      },
-      // Графы
-      { id: "inf-9", themeId: "graphs", title: "Задание 9 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "На рисунке схема дорог между городами А, Б, В, Г, Д, Е, Ж, И, К. По каждой дороге можно двигаться только в одном направлении. Сколько существует различных путей из города А в город К, проходящих через город Ж? (Схема: А→Б→Ж, А→В→Ж, А→Г→Д→Ж, Ж→Е→К, Ж→И→К, Ж→К)",
-        answer: "9",
-        hint: "Пути из А в Ж: А→Б→Ж, А→В→Ж, А→Г→Д→Ж → 3 пути. Из Ж в К: Ж→Е→К, Ж→И→К, Ж→К → 3 пути. Всего: 3·3 = 9.",
-        solution: "Шаг 1: Находим все пути из А в Ж: А→Б→Ж, А→В→Ж, А→Г→Д→Ж (3 пути).\nШаг 2: Находим все пути из Ж в К: Ж→Е→К, Ж→И→К, Ж→К (3 пути).\nШаг 3: Общее число путей = 3·3 = 9.\nОтвет: 9."
-      },
-      // Алгоритмы
-      { id: "inf-10", themeId: "algorithms", title: "Задание 10 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Сколько слов длины 5, начинающихся с гласной буквы, можно составить из букв Е, Г, Э? Каждая буква может входить несколько раз.",
-        answer: "162",
-        hint: "Гласные: Е, Э — 2 варианта. Остальные 4 позиции — любые из 3 букв. Итого 2·3⁴ = 2·81 = 162.",
-        solution: "Шаг 1: Гласные буквы: Е, Э → 2 варианта для первой позиции.\nШаг 2: Остальные 4 позиции: каждая из 3 букв → 3⁴ = 81.\nШаг 3: Всего: 2·81 = 162.\nОтвет: 162."
-      },
-      // Кодирование
-      { id: "inf-11", themeId: "coding", title: "Задание 11 (ФИПИ)", diff: "Сложно", diffType: "bad",
-        prompt: "Для передачи сигналов на флоте используются флаги, вывешиваемые в одну линию (последовательность важна). Сколько различных сигналов может передать корабль при помощи четырёх флагов, если есть флаги трёх различных видов и флагов каждого вида неограниченное количество?",
-        answer: "81",
-        hint: "Каждый из четырёх флагов — 3 варианта → 3⁴ = 81.",
-        solution: "Шаг 1: 4 позиции, каждая — 3 варианта.\nШаг 2: 3·3·3·3 = 3⁴ = 81.\nОтвет: 81."
-      },
-      // Алгоритмы
-      { id: "inf-12", themeId: "algorithms", title: "Задание 12 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Исполнитель Редактор: ПОКА нашлось (111) или нашлось (222) ЕСЛИ нашлось (111) ТО заменить (111, 22) ИНАЧЕ заменить (222, 1). Какая строка получится из 146 идущих подряд цифр 1?",
-        answer: "112",
-        hint: "Моделируем процесс. 146 единиц. Правило 111→22, 222→1. В конце останется 112.",
-        solution: "Шаг 1: 146 единиц.\nШаг 2: 111→22: каждые 3 единицы заменяются на 2 двойки.\nШаг 3: После замен получается строка из 2 и 1.\nШаг 4: В конце после всех замен остаётся 112.\nОтвет: 112."
-      },
-      // Графы
-      { id: "inf-13", themeId: "graphs", title: "Задание 13 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Для узла с IP-адресом 136.206.24.214 адрес сети равен 136.206.24.192. Чему равен третий слева байт маски?",
-        answer: "224",
-        hint: "Третий байт: 24 = 00011000, 192 = 11000000. Маска = 11100000₂ = 224.",
-        solution: "Шаг 1: Третий байт IP: 24 = 00011000₂.\nШаг 2: Третий байт адреса сети: 192 = 11000000₂.\nШаг 3: Маска: 11100000₂ = 224.\nОтвет: 224."
-      },
-      // Системы счисления
-      { id: "inf-14", themeId: "systems", title: "Задание 14 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Укажите наименьшее основание системы счисления, в которой запись числа 50 трехзначна.",
-        answer: "4",
-        hint: "p² ≤ 50 < p³. p=4 → 16≤50<64 (подходит). p=3 → 9≤50<27 (не подходит).",
-        solution: "Шаг 1: Условие: p² ≤ 50 < p³.\nШаг 2: Проверяем p=3: 9 ≤ 50 < 27 — неверно.\nШаг 3: Проверяем p=4: 16 ≤ 50 < 64 — верно.\nОтвет: 4."
-      },
-      // Логика
-      { id: "inf-15", themeId: "logic", title: "Задание 15 (ФИПИ)", diff: "Сложно", diffType: "bad",
-        prompt: "Для какого наибольшего целого числа A формула ((x ≤ 9) → (x² ≤ A)) ∧ ((y² ≤ A) → (y ≤ 9)) тождественно истинна при любых целых неотрицательных x и y?",
-        answer: "81",
-        hint: "Условие: все x ≤ 9 должны иметь x² ≤ A, и все y с y² ≤ A должны быть ≤ 9. Значит, A = 9² = 81.",
-        solution: "Шаг 1: Для x ≤ 9 должно быть x² ≤ A → A ≥ 81.\nШаг 2: Для y² ≤ A должно быть y ≤ 9 → A ≤ 81.\nШаг 3: A = 81.\nОтвет: 81."
-      },
-      // Алгоритмы (рекурсия)
-      { id: "inf-16", themeId: "algorithms", title: "Задание 16 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "F(1)=1, F(2)=2, F(n)=3F(n-1)-2F(n-2) при n>2. Чему равно F(7)?",
-        answer: "64",
-        hint: "Последовательность: 1,2,4,8,16,32,64 — степени двойки.",
-        solution: "Шаг 1: F(1)=1, F(2)=2.\nШаг 2: F(3)=3·2-2·1=4.\nШаг 3: F(4)=3·4-2·2=8.\nШаг 4: F(5)=3·8-2·4=16.\nШаг 5: F(6)=3·16-2·8=32.\nШаг 6: F(7)=3·32-2·16=64.\nОтвет: 64."
-      },
-      // Программирование
-      { id: "inf-17", themeId: "programming", title: "Задание 17 (ФИПИ)", diff: "Сложно", diffType: "bad",
-        prompt: "В файле записана последовательность целых чисел. Найдите количество пар (i,j), i<j, таких что a[i]*a[j] кратно 3, а a[i]+a[j] нечётна.",
-        answer: "42",
-        hint: "Подсчёт пар по условию. В демо-примере ответ 42.",
-        solution: "Шаг 1: Разбиваем числа на группы по кратности 3 и чётности.\nШаг 2: Подсчитываем пары, где произведение кратно 3, а сумма нечётна.\nШаг 3: Для демо-примера ответ 42.\nОтвет: 42."
-      },
-      // Системы счисления (дополнительная)
-      { id: "inf-18", themeId: "systems", title: "Задание 18 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Переведите число 101010₂ в десятичную систему счисления.",
-        answer: "42",
-        hint: "101010₂ = 1·2⁵ + 0·2⁴ + 1·2³ + 0·2² + 1·2¹ + 0·2⁰ = 32+0+8+0+2+0 = 42.",
-        solution: "Шаг 1: 101010₂ = 1·32 + 0·16 + 1·8 + 0·4 + 1·2 + 0·1.\nШаг 2: = 32 + 0 + 8 + 0 + 2 + 0 = 42.\nОтвет: 42."
-      },
-      // Графы
-      { id: "inf-19", themeId: "graphs", title: "Задание 19 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "В графе 6 вершин, степени вершин: 2,3,3,4,4,2. Сколько рёбер в графе?",
-        answer: "9",
-        hint: "Сумма степеней = 2+3+3+4+4+2 = 18. Рёбер = 18/2 = 9.",
-        solution: "Шаг 1: Сумма степеней: 2+3+3+4+4+2 = 18.\nШаг 2: По лемме о рукопожатиях: рёбер = 18/2 = 9.\nОтвет: 9."
-      },
-      // Алгоритмы (дополнительная)
-      { id: "inf-20", themeId: "algorithms", title: "Задание 20 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Исполнитель Чертежник: повтори 6 [вперёд 10, направо 60]. Какая фигура получится?",
-        answer: "шестиугольник",
-        hint: "6 повторов по 60° = 360°, замкнутая фигура с 6 сторонами.",
-        solution: "Шаг 1: 6 повторов → 6 шагов.\nШаг 2: Каждый поворот на 60° → всего 360°.\nШаг 3: Замкнутая фигура с 6 сторонами → шестиугольник.\nОтвет: шестиугольник."
-      },
-      // Алгоритмы (дополнительная)
-      { id: "inf-21", themeId: "algorithms", title: "Задание 21 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Чему равна сумма чисел от 1 до 100?",
-        answer: "5050",
-        hint: "Сумма арифметической прогрессии: (1+100)·100/2 = 5050.",
-        solution: "Шаг 1: Сумма = (a₁ + aₙ)·n/2.\nШаг 2: (1 + 100)·100/2 = 101·50 = 5050.\nОтвет: 5050."
-      },
-      // Программирование
-      { id: "inf-22", themeId: "programming", title: "Задание 22 (ФИПИ)", diff: "Сложно", diffType: "bad",
-        prompt: "Дан массив [3, 7, 2, 9, 1]. Чему равна сумма всех элементов?",
-        answer: "22",
-        hint: "3+7+2+9+1 = 22.",
-        solution: "Шаг 1: Сумма = 3+7+2+9+1.\nШаг 2: = 22.\nОтвет: 22."
-      },
-      // Алгоритмы (динамика)
-      { id: "inf-23", themeId: "algorithms", title: "Задание 23 (ФИПИ)", diff: "Сложно", diffType: "bad",
-        prompt: "Исполнитель преобразует число. Команды: Прибавить 1, Умножить на 2. Сколько программ для 1 → 20, содержащих 10?",
-        answer: "28",
-        hint: "Количество путей до 10 и от 10 до 20, перемножить.",
-        solution: "Шаг 1: dp[n] — число способов получить n.\nШаг 2: dp[1]=1, dp[n]=dp[n-1]+dp[n/2] (если n чётно).\nШаг 3: dp[10] = ... = 8, dp[20] с учетом перехода от 10 = 8·? = 28.\nОтвет: 28."
-      },
-      // Кодирование (дополнительная)
-      { id: "inf-24", themeId: "coding", title: "Задание 24 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Сколько байт в 2¹⁶ бит?",
-        answer: "8192",
-        hint: "2¹⁶ бит = 65536 бит = 8192 байта.",
-        solution: "Шаг 1: 2¹⁶ = 65536 бит.\nШаг 2: 65536 / 8 = 8192 байта.\nОтвет: 8192."
-      },
-      // Кодирование (дополнительная)
-      { id: "inf-25", themeId: "coding", title: "Задание 25 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Файл размером 10 Мбайт передан за 20 секунд. Какова скорость передачи в Мбит/с?",
-        answer: "4",
-        hint: "10 Мбайт = 80 Мбит. 80/20 = 4 Мбит/с.",
-        solution: "Шаг 1: 10 Мбайт = 10·8 = 80 Мбит.\nШаг 2: Скорость = 80/20 = 4 Мбит/с.\nОтвет: 4."
-      },
-      // Логика (дополнительная)
-      { id: "inf-26", themeId: "logic", title: "Задание 26 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Упростите выражение ¬(A ∨ B) ∨ (A ∧ B).",
-        answer: "1",
-        hint: "¬(A∨B)∨(A∧B) = (¬A∧¬B)∨(A∧B) = тавтология.",
-        solution: "Шаг 1: ¬(A∨B) = ¬A∧¬B (закон де Моргана).\nШаг 2: (¬A∧¬B)∨(A∧B).\nШаг 3: Это тавтология (всегда 1).\nОтвет: 1."
-      },
-      // Системы счисления (дополнительная)
-      { id: "inf-27", themeId: "systems", title: "Задание 27 (ФИПИ)", diff: "Средне", diffType: "warn",
-        prompt: "Сколько нулей в двоичной записи числа 75?",
-        answer: "3",
-        hint: "75₁₀ = 64+8+2+1 = 1001011₂ → 3 нуля.",
-        solution: "Шаг 1: 75 = 64 + 8 + 2 + 1 = 2⁶ + 2³ + 2¹ + 2⁰.\nШаг 2: 75₁₀ = 1001011₂.\nШаг 3: Нули на позициях 5,4,2 → 3 нуля.\nОтвет: 3."
-      }
-    ];
+    // ---------- ГЕНЕРАТОРЫ ДЛЯ СОЗДАНИЯ СТАТИЧЕСКИХ ЗАДАНИЙ ----------
+    // Функции возвращают объект { title, prompt, answer, hint, solution, diff, diffType }
+    // Будем генерировать ~25 заданий на тему
 
-    // ---------- ГЕНЕРАТОРЫ ДЛЯ ТРЕНИРОВКИ (расширенные) ----------
+    function generateCodingTasks(count) {
+      const tasks = [];
+      for (let i = 0; i < count; i++) {
+        const type = i % 8;
+        let title, prompt, answer, hint, solution;
+        if (type === 0) {
+          const bits = 5 + Math.floor(i / 2) % 5;
+          const total = 1 << bits;
+          title = `Кодирование: количество сообщений (${bits} бит)`;
+          prompt = `Сколько различных сообщений можно закодировать с помощью ${bits} бит?`;
+          answer = String(total);
+          hint = `2^${bits} = ${total}`;
+          solution = `Шаг 1: Количество сообщений = 2^${bits} = ${total}.`;
+        } else if (type === 1) {
+          const num = 100 + i * 3;
+          const bin = num.toString(2);
+          title = `Кодирование: перевод в двоичную (${num})`;
+          prompt = `Переведите число ${num} в двоичную систему счисления.`;
+          answer = bin;
+          hint = `Делите на 2, остатки записывайте в обратном порядке.`;
+          solution = `Шаг 1: ${num}₁₀ = ${bin}₂.`;
+        } else if (type === 2) {
+          const bin = (100 + i * 7).toString(2);
+          const dec = parseInt(bin, 2);
+          title = `Кодирование: перевод в десятичную (${bin})`;
+          prompt = `Переведите двоичное число ${bin}₂ в десятичную систему.`;
+          answer = String(dec);
+          hint = `Разложите по степеням двойки.`;
+          solution = `Шаг 1: ${bin}₂ = ${dec}₁₀.`;
+        } else if (type === 3) {
+          const size = 10 + i * 2;
+          const speed = 2 + i % 5;
+          const time = 8 + i % 3;
+          const result = size * 8 / time;
+          title = `Кодирование: скорость передачи (${size} Кбайт)`;
+          prompt = `Файл размером ${size} Кбайт передан за ${time} с. Найдите скорость в Кбит/с.`;
+          answer = String(result);
+          hint = `${size} Кбайт = ${size*8} Кбит, /${time}с = ${result} Кбит/с`;
+          solution = `Шаг 1: ${size} Кбайт = ${size*8} Кбит.\nШаг 2: Скорость = ${size*8}/${time} = ${result}.`;
+        } else if (type === 4) {
+          const alpha = 4 + i % 5;
+          const bits = Math.ceil(Math.log2(alpha));
+          title = `Кодирование: бит на символ (${alpha} символов)`;
+          prompt = `Алфавит содержит ${alpha} символов. Сколько бит нужно для кодирования одного символа?`;
+          answer = String(bits);
+          hint = `Нужно найти k: 2^k ≥ ${alpha}.`;
+          solution = `Шаг 1: 2^${bits-1} = ${1<<(bits-1)} < ${alpha} ≤ 2^${bits} = ${1<<bits}, значит k = ${bits}.`;
+        } else if (type === 5) {
+          const n = 3 + i % 4;
+          const total = 3 ** n;
+          title = `Кодирование: количество слов (длина ${n})`;
+          prompt = `Сколько слов длины ${n} из букв {А,Б,В} можно составить?`;
+          answer = String(total);
+          hint = `Каждая позиция — 3 варианта, итого 3^${n}.`;
+          solution = `Шаг 1: 3^${n} = ${total}.`;
+        } else if (type === 6) {
+          const sz = 5 + i % 3;
+          const vol = sz * 1024;
+          title = `Кодирование: байты в Кбайты (${sz} Кбайт)`;
+          prompt = `Сколько байт в ${sz} Кбайт?`;
+          answer = String(vol);
+          hint = `1 Кбайт = 1024 байта.`;
+          solution = `Шаг 1: ${sz} * 1024 = ${vol} байт.`;
+        } else {
+          const bits = 10 + i % 6;
+          const messages = 1 << bits;
+          title = `Кодирование: количество сообщений (${bits} бит)`;
+          prompt = `Сколько различных сообщений можно закодировать ${bits} битами?`;
+          answer = String(messages);
+          hint = `2^${bits} = ${messages}`;
+          solution = `Шаг 1: 2^${bits} = ${messages}.`;
+        }
+        tasks.push({ id: `gen-coding-${i}`, themeId: "coding", title, prompt, answer, hint, solution, diff: "Средне", diffType: "warn" });
+      }
+      return tasks;
+    }
+
+    function generateLogicTasks(count) {
+      const tasks = [];
+      for (let i = 0; i < count; i++) {
+        const type = i % 8;
+        let title, prompt, answer, hint, solution;
+        if (type === 0) {
+          const x = Math.round(Math.random());
+          const y = Math.round(Math.random());
+          const z = Math.round(Math.random());
+          const res = (x && !y) || (z && y) ? 1 : 0;
+          title = `Логика: выражение (x ∧ ¬y) ∨ (z ∧ y)`;
+          prompt = `Вычислите (x ∧ ¬y) ∨ (z ∧ y) при x=${x}, y=${y}, z=${z}.`;
+          answer = String(res);
+          hint = `Подставьте значения.`;
+          solution = `Шаг 1: (${x} ∧ ¬${y}) ∨ (${z} ∧ ${y}) = ${res}.`;
+        } else if (type === 1) {
+          title = `Логика: закон де Моргана`;
+          prompt = `Упростите ¬(A ∨ B).`;
+          answer = "¬A ∧ ¬B";
+          hint = `Примените закон де Моргана.`;
+          solution = `Шаг 1: ¬(A∨B) = ¬A∧¬B.`;
+        } else if (type === 2) {
+          const a = Math.round(Math.random());
+          const b = Math.round(Math.random());
+          const imp = (!a || b) ? 1 : 0;
+          title = `Логика: импликация`;
+          prompt = `Вычислите A → B при A=${a}, B=${b}.`;
+          answer = String(imp);
+          hint = `A→B = ¬A∨B.`;
+          solution = `Шаг 1: ¬${a}∨${b} = ${imp}.`;
+        } else if (type === 3) {
+          const a = Math.round(Math.random());
+          const b = Math.round(Math.random());
+          const eq = (a === b) ? 1 : 0;
+          title = `Логика: эквиваленция`;
+          prompt = `Вычислите A ∼ B при A=${a}, B=${b}.`;
+          answer = String(eq);
+          hint = `A∼B = (A∧B)∨(¬A∧¬B).`;
+          solution = `Шаг 1: (${a}∧${b})∨(¬${a}∧¬${b}) = ${eq}.`;
+        } else if (type === 4) {
+          title = `Логика: упрощение`;
+          prompt = `Упростите ¬(A ∧ ¬B) ∨ B.`;
+          answer = "1";
+          hint = `Используйте законы логики.`;
+          solution = `Шаг 1: ¬(A∧¬B)∨B = ¬A∨B∨B = 1.`;
+        } else if (type === 5) {
+          const x = Math.round(Math.random());
+          const y = Math.round(Math.random());
+          const res = (!x || y) && (x || !y) ? 1 : 0;
+          title = `Логика: выражение (¬x∨y)∧(x∨¬y)`;
+          prompt = `Вычислите (¬x∨y)∧(x∨¬y) при x=${x}, y=${y}.`;
+          answer = String(res);
+          hint = `Подставьте значения.`;
+          solution = `Шаг 1: (¬${x}∨${y})∧(${x}∨¬${y}) = ${res}.`;
+        } else if (type === 6) {
+          title = `Логика: поглощение`;
+          prompt = `Упростите A ∨ (A ∧ B).`;
+          answer = "A";
+          hint = `Закон поглощения.`;
+          solution = `Шаг 1: A∨(A∧B) = A.`;
+        } else {
+          title = `Логика: де Морган`;
+          prompt = `Упростите ¬(¬A ∨ ¬B).`;
+          answer = "A ∧ B";
+          hint = `Закон де Моргана.`;
+          solution = `Шаг 1: ¬(¬A∨¬B) = A∧B.`;
+        }
+        tasks.push({ id: `gen-logic-${i}`, themeId: "logic", title, prompt, answer, hint, solution, diff: "Средне", diffType: "warn" });
+      }
+      return tasks;
+    }
+
+    function generateSystemsTasks(count) {
+      const tasks = [];
+      for (let i = 0; i < count; i++) {
+        const type = i % 10;
+        let title, prompt, answer, hint, solution;
+        if (type === 0) {
+          const num = 100 + i * 3;
+          const bin = num.toString(2);
+          title = `Системы счисления: перевод в двоичную (${num})`;
+          prompt = `Переведите ${num}₁₀ в двоичную систему.`;
+          answer = bin;
+          hint = `Делите на 2.`;
+          solution = `Шаг 1: ${num}₁₀ = ${bin}₂.`;
+        } else if (type === 1) {
+          const bin = (100 + i * 7).toString(2);
+          const dec = parseInt(bin, 2);
+          title = `Системы счисления: перевод в десятичную (${bin})`;
+          prompt = `Переведите ${bin}₂ в десятичную систему.`;
+          answer = String(dec);
+          hint = `Разложите по степеням.`;
+          solution = `Шаг 1: ${bin}₂ = ${dec}₁₀.`;
+        } else if (type === 2) {
+          const num = 50 + i * 3;
+          const ones = num.toString(2).split('1').length - 1;
+          title = `Системы счисления: количество единиц (${num})`;
+          prompt = `Сколько единиц в двоичной записи числа ${num}?`;
+          answer = String(ones);
+          hint = `Переведите в двоичную и посчитайте.`;
+          solution = `Шаг 1: ${num}₁₀ = ${num.toString(2)}₂, единиц: ${ones}.`;
+        } else if (type === 3) {
+          const base = 3 + i % 5;
+          const num = base * base + Math.floor(Math.random() * (base * base * 2));
+          title = `Системы счисления: поиск основания`;
+          prompt = `Найдите наименьшее основание системы, в которой число ${num} трёхзначно.`;
+          answer = String(base);
+          hint = `p² ≤ ${num} < p³.`;
+          solution = `Шаг 1: p² ≤ ${num} < p³, p = ${base}.`;
+        } else if (type === 4) {
+          const a = 2 + i % 5;
+          const b = 3 + i % 5;
+          const sum = a + b;
+          const binSum = sum.toString(2);
+          title = `Системы счисления: сложение двоичных (${a} + ${b})`;
+          prompt = `Сложите двоичные числа ${a.toString(2)}₂ и ${b.toString(2)}₂. Ответ дайте в двоичной системе.`;
+          answer = binSum;
+          hint = `${a}₁₀ + ${b}₁₀ = ${sum}₁₀ = ${binSum}₂.`;
+          solution = `Шаг 1: ${a}₂ + ${b}₂ = ${sum}₂.`;
+        } else if (type === 5) {
+          const a = 2 + i % 4;
+          const b = 2 + i % 4;
+          const prod = a * b;
+          const binProd = prod.toString(2);
+          title = `Системы счисления: умножение двоичных (${a} * ${b})`;
+          prompt = `Умножьте двоичные числа ${a.toString(2)}₂ и ${b.toString(2)}₂. Ответ дайте в двоичной системе.`;
+          answer = binProd;
+          hint = `${a}₁₀ * ${b}₁₀ = ${prod}₁₀ = ${binProd}₂.`;
+          solution = `Шаг 1: ${a}₂ * ${b}₂ = ${prod}₂.`;
+        } else if (type === 6) {
+          const hex = (100 + i * 11).toString(16).toUpperCase();
+          const dec = parseInt(hex, 16);
+          title = `Системы счисления: шестнадцатеричная → десятичная (${hex})`;
+          prompt = `Переведите ${hex}₁₆ в десятичную систему.`;
+          answer = String(dec);
+          hint = `Разложите по степеням 16.`;
+          solution = `Шаг 1: ${hex}₁₆ = ${dec}₁₀.`;
+        } else if (type === 7) {
+          const num = 50 + i * 5;
+          const oct = num.toString(8);
+          title = `Системы счисления: десятичная → восьмеричная (${num})`;
+          prompt = `Переведите ${num}₁₀ в восьмеричную систему.`;
+          answer = oct;
+          hint = `Делите на 8.`;
+          solution = `Шаг 1: ${num}₁₀ = ${oct}₈.`;
+        } else if (type === 8) {
+          const num = 100 + i * 7;
+          const bin = num.toString(2);
+          const zeros = bin.split('0').length - 1;
+          title = `Системы счисления: количество нулей (${num})`;
+          prompt = `Сколько нулей в двоичной записи числа ${num}?`;
+          answer = String(zeros);
+          hint = `Переведите и посчитайте.`;
+          solution = `Шаг 1: ${num}₁₀ = ${bin}₂, нулей: ${zeros}.`;
+        } else {
+          const a = 5 + i % 5;
+          const b = 3 + i % 5;
+          const sum = a + b;
+          const binSum = sum.toString(2);
+          title = `Системы счисления: десятичная → двоичная (${a}+${b})`;
+          prompt = `Сложите числа ${a} и ${b}, результат запишите в двоичной системе.`;
+          answer = binSum;
+          hint = `${a}+${b}=${sum}₁₀ = ${binSum}₂.`;
+          solution = `Шаг 1: ${sum}₁₀ = ${binSum}₂.`;
+        }
+        tasks.push({ id: `gen-systems-${i}`, themeId: "systems", title, prompt, answer, hint, solution, diff: "Средне", diffType: "warn" });
+      }
+      return tasks;
+    }
+
+    function generateGraphsTasks(count) {
+      const tasks = [];
+      for (let i = 0; i < count; i++) {
+        const type = i % 6;
+        let title, prompt, answer, hint, solution;
+        if (type === 0) {
+          const n = 3 + i % 4;
+          const edges = n * (n - 1) / 2;
+          title = `Графы: полный граф (${n} вершин)`;
+          prompt = `Сколько рёбер в полном графе с ${n} вершинами?`;
+          answer = String(edges);
+          hint = `C(${n},2) = ${edges}`;
+          solution = `Шаг 1: C(${n},2) = ${edges}.`;
+        } else if (type === 1) {
+          const degrees = [2,3,3,2,2];
+          const sum = degrees.reduce((a,b)=>a+b,0);
+          const edges = sum/2;
+          title = `Графы: сумма степеней`;
+          prompt = `Степени вершин: ${degrees.join(', ')}. Сколько рёбер в графе?`;
+          answer = String(edges);
+          hint = `Сумма степеней = ${sum}, рёбер = ${sum}/2 = ${edges}.`;
+          solution = `Шаг 1: Сумма = ${sum}, рёбер = ${sum}/2 = ${edges}.`;
+        } else if (type === 2) {
+          title = `Графы: пути в графе`;
+          prompt = `Сколько путей из A в D: A→B, A→C, B→D, C→D?`;
+          answer = "2";
+          hint = `A→B→D и A→C→D.`;
+          solution = `Шаг 1: Два пути.`;
+        } else if (type === 3) {
+          const n = 4 + i % 3;
+          const edges = n * (n - 1) / 2;
+          title = `Графы: максимальное число рёбер (${n} вершин)`;
+          prompt = `Какое максимальное число рёбер может быть в графе с ${n} вершинами?`;
+          answer = String(edges);
+          hint = `Полный граф: C(${n},2)=${edges}.`;
+          solution = `Шаг 1: C(${n},2)=${edges}.`;
+        } else if (type === 4) {
+          title = `Графы: пути из A в B`;
+          prompt = `Сколько путей из A в B: A→B, A→C→B, A→D→B?`;
+          answer = "3";
+          hint = `Три пути.`;
+          solution = `Шаг 1: A→B, A→C→B, A→D→B.`;
+        } else {
+          title = `Графы: простой путь`;
+          prompt = `В графе A→B→D, A→C→D. Сколько путей из A в D?`;
+          answer = "2";
+          hint = `Два пути.`;
+          solution = `Шаг 1: A→B→D и A→C→D.`;
+        }
+        tasks.push({ id: `gen-graphs-${i}`, themeId: "graphs", title, prompt, answer, hint, solution, diff: "Средне", diffType: "warn" });
+      }
+      return tasks;
+    }
+
+    function generateAlgorithmsTasks(count) {
+      const tasks = [];
+      for (let i = 0; i < count; i++) {
+        const type = i % 10;
+        let title, prompt, answer, hint, solution;
+        if (type === 0) {
+          const n = 5 + i % 6;
+          let f = (n) => n<=2 ? 1 : f(n-1)+f(n-2);
+          const val = f(n);
+          title = `Алгоритмы: числа Фибоначчи (F(${n}))`;
+          prompt = `F(1)=1, F(2)=1, F(n)=F(n-1)+F(n-2). Найти F(${n}).`;
+          answer = String(val);
+          hint = `Число Фибоначчи: ${val}.`;
+          solution = `Шаг 1: F(${n}) = ${val}.`;
+        } else if (type === 1) {
+          const a = 1 + i % 10;
+          const b = a + 2 + i % 5;
+          const s = (a + b) * (b - a + 1) / 2;
+          title = `Алгоритмы: сумма чисел от ${a} до ${b}`;
+          prompt = `Чему равна сумма чисел от ${a} до ${b}?`;
+          answer = String(s);
+          hint = `Сумма арифметической прогрессии.`;
+          solution = `Шаг 1: (${a}+${b})*(${b}-${a}+1)/2 = ${s}.`;
+        } else if (type === 2) {
+          const n = 4 + i % 4;
+          const fact = (n) => n<=1 ? 1 : n*fact(n-1);
+          const val = fact(n);
+          title = `Алгоритмы: факториал (${n}!)`;
+          prompt = `Чему равен ${n}!?`;
+          answer = String(val);
+          hint = `${n}! = ${val}.`;
+          solution = `Шаг 1: ${n}! = ${val}.`;
+        } else if (type === 3) {
+          const n = 3 + i % 5;
+          const pow2 = 1 << n;
+          title = `Алгоритмы: 2^${n}`;
+          prompt = `Чему равно 2^${n}?`;
+          answer = String(pow2);
+          hint = `2^${n} = ${pow2}.`;
+          solution = `Шаг 1: 2^${n} = ${pow2}.`;
+        } else if (type === 4) {
+          const n = 5 + i % 5;
+          const sum = n * (n + 1) / 2;
+          title = `Алгоритмы: сумма первых ${n} чисел`;
+          prompt = `Чему равна сумма первых ${n} натуральных чисел?`;
+          answer = String(sum);
+          hint = `n(n+1)/2 = ${sum}.`;
+          solution = `Шаг 1: ${n}*(${n}+1)/2 = ${sum}.`;
+        } else if (type === 5) {
+          title = `Алгоритмы: обмен значений`;
+          prompt = `x=2, y=3. x=x+y; y=x-y; x=x-y. Чему равно x?`;
+          answer = "3";
+          hint = `Происходит обмен.`;
+          solution = `Шаг 1: x станет равно y (3).`;
+        } else if (type === 6) {
+          const n = 5 + i % 5;
+          const sqSum = n * (n + 1) * (2 * n + 1) / 6;
+          title = `Алгоритмы: сумма квадратов до ${n}`;
+          prompt = `Чему равна сумма квадратов чисел от 1 до ${n}?`;
+          answer = String(sqSum);
+          hint = `Формула: n(n+1)(2n+1)/6.`;
+          solution = `Шаг 1: ${n}*(${n}+1)*(${2*n}+1)/6 = ${sqSum}.`;
+        } else if (type === 7) {
+          title = `Алгоритмы: Редактор (111→22)`;
+          prompt = `Исполнитель Редактор: 111→22, 222→1. Из 111111 что получится?`;
+          answer = "22";
+          hint = `Замените 111 на 22 дважды.`;
+          solution = `Шаг 1: 111111 → 2222 → 22.`;
+        } else if (type === 8) {
+          const n = 3 + i % 4;
+          const rec = (n) => n<=1 ? 1 : n * rec(n-1);
+          const val = rec(n);
+          title = `Алгоритмы: рекурсивный факториал (${n})`;
+          prompt = `F(1)=1, F(n)=n*F(n-1). Найти F(${n}).`;
+          answer = String(val);
+          hint = `Рекурсия: ${n}! = ${val}.`;
+          solution = `Шаг 1: F(${n}) = ${val}.`;
+        } else {
+          title = `Алгоритмы: цикл while`;
+          prompt = `Программа: a=5; while(a>0){ print(a); a-=2; } Что выведет?`;
+          answer = "5 3 1";
+          hint = `Цикл выводит нечётные числа от 5 до 1.`;
+          solution = `Шаг 1: 5, 3, 1.`;
+        }
+        tasks.push({ id: `gen-algorithms-${i}`, themeId: "algorithms", title, prompt, answer, hint, solution, diff: "Средне", diffType: "warn" });
+      }
+      return tasks;
+    }
+
+    function generateProgrammingTasks(count) {
+      const tasks = [];
+      for (let i = 0; i < count; i++) {
+        const type = i % 8;
+        let title, prompt, answer, hint, solution;
+        if (type === 0) {
+          const a = 1 + i % 10;
+          const b = a + 2 + i % 5;
+          const s = (a + b) * (b - a + 1) / 2;
+          title = `Программирование: сумма от ${a} до ${b}`;
+          prompt = `Чему равна сумма чисел от ${a} до ${b} в цикле for?`;
+          answer = String(s);
+          hint = `Сумма арифметической прогрессии.`;
+          solution = `Шаг 1: ${s}.`;
+        } else if (type === 1) {
+          const arr = [1,2,3,4,5];
+          const s = arr.reduce((a,b)=>a+b,0);
+          title = `Программирование: сумма элементов массива`;
+          prompt = `Чему равна сумма элементов массива [1,2,3,4,5]?`;
+          answer = String(s);
+          hint = `1+2+3+4+5 = ${s}.`;
+          solution = `Шаг 1: ${s}.`;
+        } else if (type === 2) {
+          title = `Программирование: цикл while`;
+          prompt = `Программа: a=5; while(a>0){ print(a); a--; } Что выведет?`;
+          answer = "5 4 3 2 1";
+          hint = `Цикл выводит числа от 5 до 1.`;
+          solution = `Шаг 1: 5 4 3 2 1.`;
+        } else if (type === 3) {
+          const arr = [2,4,6,8,10];
+          const s = arr.reduce((a,b)=>a+b,0);
+          title = `Программирование: сумма чётных чисел`;
+          prompt = `Чему равна сумма элементов массива [2,4,6,8,10]?`;
+          answer = String(s);
+          hint = `Сумма = ${s}.`;
+          solution = `Шаг 1: ${s}.`;
+        } else if (type === 4) {
+          const n = 3 + i % 5;
+          const prod = (n) => n<=1 ? 1 : n * prod(n-1);
+          const val = prod(n);
+          title = `Программирование: произведение от 1 до ${n}`;
+          prompt = `Чему равно произведение чисел от 1 до ${n}?`;
+          answer = String(val);
+          hint = `${n}! = ${val}.`;
+          solution = `Шаг 1: ${n}! = ${val}.`;
+        } else if (type === 5) {
+          title = `Программирование: обмен переменных`;
+          prompt = `a=2; b=3; a=a+b; b=a-b; a=a-b; Чему равны a и b?`;
+          answer = "a=3 b=2";
+          hint = `Обмен значений.`;
+          solution = `Шаг 1: a=3, b=2.`;
+        } else if (type === 6) {
+          const arr = [3,7,2,9,5];
+          const max = Math.max(...arr);
+          title = `Программирование: максимум в массиве`;
+          prompt = `Найдите максимум в массиве [3,7,2,9,5].`;
+          answer = String(max);
+          hint = `Максимум = ${max}.`;
+          solution = `Шаг 1: ${max}.`;
+        } else {
+          const n = 4 + i % 5;
+          const sum = n * (n + 1) / 2;
+          title = `Программирование: сумма первых ${n} чисел`;
+          prompt = `Чему равна сумма чисел от 1 до ${n}?`;
+          answer = String(sum);
+          hint = `n(n+1)/2 = ${sum}.`;
+          solution = `Шаг 1: ${n}*(${n}+1)/2 = ${sum}.`;
+        }
+        tasks.push({ id: `gen-programming-${i}`, themeId: "programming", title, prompt, answer, hint, solution, diff: "Средне", diffType: "warn" });
+      }
+      return tasks;
+    }
+
+    // Функция генерации всех статических заданий
+    function generateStaticTasks() {
+      const tasks = [];
+      // Каждая тема генерирует 25 заданий, итого 150
+      tasks.push(...generateCodingTasks(25));
+      tasks.push(...generateLogicTasks(25));
+      tasks.push(...generateSystemsTasks(25));
+      tasks.push(...generateGraphsTasks(25));
+      tasks.push(...generateAlgorithmsTasks(25));
+      tasks.push(...generateProgrammingTasks(25));
+      return tasks;
+    }
+
+    // Загружаем задания из localStorage или генерируем
+    let TASKS_INF = [];
+    function loadTasks() {
+      try {
+        const raw = localStorage.getItem(TASKS_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            TASKS_INF = parsed;
+            return;
+          }
+        }
+      } catch(e) {}
+      // Генерация
+      TASKS_INF = generateStaticTasks();
+      localStorage.setItem(TASKS_KEY, JSON.stringify(TASKS_INF));
+    }
+    loadTasks();
+
+    // ---------- ГЕНЕРАТОРЫ ДЛЯ ТРЕНИРОВКИ (динамические) ----------
     const TRAINING_TOPICS = [
       { id: "systems", name: "Системы счисления" },
       { id: "coding", name: "Кодирование информации" },
@@ -1257,7 +1612,7 @@
       { id: "programming", name: "Программирование" }
     ];
 
-    // ---- РАСШИРЕННЫЕ ГЕНЕРАТОРЫ (10+ типов на тему) ----
+    // ---- РАСШИРЕННЫЕ ГЕНЕРАТОРЫ (динамические, с рандомными числами) ----
     function generateSystemsTask() {
       const type = Math.floor(Math.random() * 12);
       if (type === 0) {
@@ -1593,7 +1948,12 @@
         first: false,
         three: false,
         five: false,
-        fifty: false
+        fifty: false,
+        ten: false,
+        hundred: false,
+        week: false,
+        allMistakes: false,
+        firstExam: false
       },
       unreadMessages: { "m1": true, "m2": true, "m3": false },
       messages: [
@@ -1622,8 +1982,9 @@
         ]
       },
       notifications: [],
-      // Для работы над ошибками
-      mistakeReview: null // { total, fixed, startTime }
+      mistakeReview: null,
+      // Для адаптивного обучения: количество решённых задач по темам
+      adaptiveStats: {} // { topicId: { solved: 0, correct: 0 } }
     };
 
     function loadState(){
@@ -1637,8 +1998,11 @@
         if (!parsed.attempts) parsed.attempts = {};
         if (!parsed.plan) parsed.plan = { tasks: DEFAULT_STATE.plan.tasks.map(t => ({ ...t })) };
         if (!parsed.notifications) parsed.notifications = [];
+        if (!parsed.adaptiveStats) parsed.adaptiveStats = {};
         if (parsed.isDemo === undefined) parsed.isDemo = false;
         if (!parsed.mistakeReview) parsed.mistakeReview = null;
+        // Достижения
+        if (!parsed.achievements) parsed.achievements = DEFAULT_STATE.achievements;
         return { ...structuredClone(DEFAULT_STATE), ...parsed };
       }catch(e){
         return structuredClone(DEFAULT_STATE);
@@ -1784,6 +2148,7 @@
       if(r1 === "exam"){ setHeader({ title: "Экзамен", subtitle: "Тренировка в формате ЕГЭ", canBack:false, showBell:true }); renderExam(); return; }
       if(r1 === "progress"){ setHeader({ title: "Прогресс", subtitle: "Достижения и рейтинг", canBack:false, showBell:true }); renderProgress(); return; }
       if(r1 === "plan"){ setHeader({ title: "План подготовки", subtitle: "Автоматические рекомендации", canBack:false, showBell:true }); renderPlan(); return; }
+      if(r1 === "achievements"){ setHeader({ title: "Достижения", subtitle: "Ваши победы", canBack:false, showBell:true }); renderAchievements(); return; }
       if(r1 === "settings"){ setHeader({ title: "Настройки", subtitle: "Тема и аккаунт", canBack:false, showBell:true }); renderSettings(); return; }
 
       if(r1 === "subject" && r2 === "inf"){
@@ -1968,7 +2333,6 @@
       go("#/subject/inf?tab=theory&theme=" + themeId);
     }
 
-    // Функция для подсчёта ошибок по темам
     function getMistakesByTopic() {
       const groups = {};
       state.mistakes.forEach(m => {
@@ -1976,6 +2340,24 @@
         groups[m.topicId]++;
       });
       return groups;
+    }
+
+    // Адаптивное обучение: возвращает тему, которую нужно рекомендовать
+    function getAdaptiveRecommendation() {
+      const stats = state.adaptiveStats || {};
+      let weakest = null;
+      let weakestPct = 100;
+      for (const theme of THEMES_INF) {
+        const s = stats[theme.id];
+        if (s && s.solved >= 3) {
+          const pct = Math.round((s.correct / s.solved) * 100);
+          if (pct < weakestPct) {
+            weakestPct = pct;
+            weakest = theme;
+          }
+        }
+      }
+      return weakest;
     }
 
     // =========================================================
@@ -2029,6 +2411,9 @@
       const weakest = weakThemes.length > 0 ? weakThemes[0] : null;
       const weakestPct = weakest ? weakest.pct : 100;
 
+      // Адаптивная рекомендация
+      const adaptive = getAdaptiveRecommendation();
+
       let recTasks = 5;
       if (weakest) {
         const unsolved = TASKS_INF.filter(t => t.themeId === weakest.id && !state.solved[t.id]);
@@ -2036,7 +2421,6 @@
         if (recTasks === 0) recTasks = 5;
       }
 
-      // Показываем количество неисправленных ошибок
       const mistakesCount = state.mistakes.length;
       let mistakeBlock = '';
       if (mistakesCount > 0) {
@@ -2047,6 +2431,22 @@
               <div>
                 <div style="font-weight:1100;">Неисправленных ошибок: ${mistakesCount}</div>
                 <button class="btn small" style="margin-top:4px;" id="fixMistakesBtn">Исправить ошибки</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      let adaptiveBlock = '';
+      if (adaptive) {
+        adaptiveBlock = `
+          <div class="card pad" style="border-color:color-mix(in srgb, var(--brand) 30%, var(--border)); background:color-mix(in srgb, var(--brand) 6%, var(--surface)); margin-top:12px;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <span style="font-size:28px;">🧠</span>
+              <div>
+                <div style="font-weight:1100;">Адаптивная рекомендация</div>
+                <div style="font-weight:800;font-size:15px;">По теме «${adaptive.name}» у вас низкая точность</div>
+                <div style="font-weight:700;font-size:13px;">Рекомендуем больше практики</div>
               </div>
             </div>
           </div>
@@ -2079,6 +2479,7 @@
         </div>
 
         ${mistakeBlock}
+        ${adaptiveBlock}
 
         <div class="card pad" style="border-color:color-mix(in srgb, var(--warning) 40%, var(--border)); background:color-mix(in srgb, var(--warning) 6%, var(--surface)); margin-top:12px;">
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -2113,7 +2514,12 @@
           ${achRow("Первая пятёрка", "Решить одно задание", state.achievements.first)}
           ${achRow("В ударе", "Решить 3 задания", state.achievements.three)}
           ${achRow("Ударник труда", "Решить 5 заданий", state.achievements.five)}
+          ${achRow("10 задач", "Решить 10 заданий", state.achievements.ten)}
           ${achRow("50 задач", "Решить 50 заданий", state.achievements.fifty)}
+          ${achRow("100 задач", "Решить 100 заданий", state.achievements.hundred)}
+          ${achRow("Неделя подряд", "Заниматься 7 дней подряд", state.achievements.week)}
+          ${achRow("Все ошибки", "Исправить все ошибки", state.achievements.allMistakes)}
+          ${achRow("Первый экзамен", "Пройти первый экзамен", state.achievements.firstExam)}
         </div>
       `;
 
@@ -2132,7 +2538,6 @@
 
       document.getElementById("fixMistakesBtn")?.addEventListener("click", ()=>{
         go("#/subject/inf?tab=mistakes");
-        // Если есть ошибки, сразу запускаем повтор
         setTimeout(() => {
           const btn = document.getElementById("reviewAllMistakes");
           if (btn) btn.click();
@@ -2216,8 +2621,9 @@
       });
 
       document.getElementById("startPlanBtn")?.addEventListener("click", ()=>{
-        if (weakThemes.length > 0) {
-          const topicId = weakThemes[0].id;
+        const weak = getWeakThemes();
+        if (weak.length > 0) {
+          const topicId = weak[0].id;
           currentTopic = topicId;
           generateNewTask();
           go("#/subject/inf?tab=training");
@@ -2382,7 +2788,8 @@
     function renderInfTheory(themeParam){
       const getThemeTaskCount = (themeId) => {
         const theme = THEMES_INF.find(t => t.id === themeId);
-        return theme ? theme.taskIds.length : 0;
+        // считаем количество заданий по теме в TASKS_INF
+        return TASKS_INF.filter(t => t.themeId === themeId).length;
       };
       const getOpenClass = (themeId) => {
         return themeParam === themeId ? 'open' : '';
@@ -2439,7 +2846,7 @@
       let filteredTasks = [...TASKS_INF];
       if (state.selectedThemeInf) {
         const theme = THEMES_INF.find(t => t.id === state.selectedThemeInf);
-        if (theme) filteredTasks = filteredTasks.filter(t => theme.taskIds.includes(t.id));
+        if (theme) filteredTasks = filteredTasks.filter(t => t.themeId === theme.id);
       }
       if (state.showOnlyUnsolvedInf) {
         filteredTasks = filteredTasks.filter(t => !state.solved[t.id]);
@@ -2449,12 +2856,9 @@
       }
 
       const getThemeProgress = (themeId) => {
-        const theme = THEMES_INF.find(t => t.id === themeId);
-        if (!theme) return '';
-        const totalInTheme = theme.taskIds.length;
-        if (totalInTheme === 0) return '';
-        const solvedInTheme = theme.taskIds.filter(id => state.solved[id]).length;
-        return ` ${solvedInTheme}/${totalInTheme}`;
+        const totalInTheme = TASKS_INF.filter(t => t.themeId === themeId).length;
+        const solvedInTheme = TASKS_INF.filter(t => t.themeId === themeId && state.solved[t.id]).length;
+        return totalInTheme ? ` ${solvedInTheme}/${totalInTheme}` : '';
       };
 
       return `
@@ -2654,7 +3058,7 @@
           toast("❌ Неверно", "Ошибка записана в раздел «Мои ошибки»", "bad");
           $answer.classList.add("input-error");
 
-          const topic = THEMES_INF.find(t => t.taskIds.includes(task.id));
+          const topic = THEMES_INF.find(t => t.id === task.themeId);
           const topicId = topic ? topic.id : 'unknown';
           addMistake(topicId, task.prompt, task.answer, task.hint, $answer.value);
           updateTopicStats(topicId, false);
@@ -2884,7 +3288,7 @@
         const correct = task ? normalizeAnswer(task.answer) : null;
         const isCorrect = userAnswer === correct;
         if (task) {
-          const theme = THEMES_INF.find(t => t.taskIds.includes(task.id));
+          const theme = THEMES_INF.find(t => t.id === task.themeId);
           if (theme) updateTopicStats(theme.id, isCorrect);
         }
         return {
@@ -2899,6 +3303,12 @@
       state.examResults = results;
       const mode = state.examMode;
       state.examMode = null;
+      // Достижение "Первый экзамен"
+      if (!state.achievements.firstExam) {
+        state.achievements.firstExam = true;
+        addNotification("🏆 Достижение", "Первый экзамен пройден!", "#/achievements");
+        toast("🏆 Достижение!", "Первый экзамен пройден!", "ok");
+      }
       saveState(state);
       go("#/exam/result");
     }
@@ -2917,7 +3327,7 @@
       const themeStats = {};
       results.forEach(r => {
         if (!r.task) return;
-        const theme = THEMES_INF.find(t => t.taskIds.includes(r.task.id));
+        const theme = THEMES_INF.find(t => t.id === r.task.themeId);
         if (!theme) return;
         if (!themeStats[theme.id]) themeStats[theme.id] = { correct: 0, total: 0, name: theme.name };
         themeStats[theme.id].total++;
@@ -2973,7 +3383,7 @@
               ${wrongTasks.map((r, idx) => `
                 <div class="card" style="padding:10px; border-color:var(--danger);">
                   <div style="font-weight:1000;">${escapeHtml(r.task.title)}</div>
-                  <div class="muted" style="font-size:12px;">Тема: ${THEMES_INF.find(t=>t.taskIds.includes(r.task.id))?.name || '—'}</div>
+                  <div class="muted" style="font-size:12px;">Тема: ${THEMES_INF.find(t=>t.id===r.task.themeId)?.name || '—'}</div>
                   <div class="row" style="margin-top:4px;">
                     <span class="chip bad">Ваш: ${escapeHtml(r.userAnswer)}</span>
                     <span class="chip ok">Верно: ${escapeHtml(r.correct)}</span>
@@ -2989,7 +3399,7 @@
           `}
 
           <div class="sp"></div>
-          <button class="btn primary full" id="createPlanBtn">📅 Создать план подготовки</button>
+          <button class="btn primary full" id="createPlanBtn">📅 Сформировать план подготовки</button>
           <button class="btn secondary full" style="margin-top:6px;" id="backToExam">К выбору экзамена</button>
         </div>
       `;
@@ -2999,7 +3409,7 @@
           const taskId = btn.getAttribute("data-add-mistake");
           const task = TASKS_INF.find(t => t.id === taskId);
           if (task) {
-            const theme = THEMES_INF.find(t => t.taskIds.includes(task.id));
+            const theme = THEMES_INF.find(t => t.id === task.themeId);
             addMistake(theme ? theme.id : 'unknown', task.prompt, task.answer, task.hint || task.solution || '', '');
             toast("Добавлено", "Задание в разделе «Мои ошибки»", "ok");
           }
@@ -3030,7 +3440,17 @@
       state.achievements.first = solvedCount >= 1;
       state.achievements.three = solvedCount >= 3;
       state.achievements.five = solvedCount >= 5;
+      state.achievements.ten = solvedCount >= 10;
       state.achievements.fifty = solvedCount >= 50;
+      state.achievements.hundred = solvedCount >= 100;
+      // Неделя
+      const streak = state.streak?.count || 0;
+      state.achievements.week = streak >= 7;
+      // Все ошибки исправлены (если ошибок 0 и достижение ещё не получено)
+      if (state.mistakes.length === 0 && !state.achievements.allMistakes) {
+        state.achievements.allMistakes = true;
+        addNotification("🏆 Достижение", "Все ошибки исправлены!", "#/achievements");
+      }
     }
 
     function updateStreak() {
@@ -3054,8 +3474,14 @@
       state.solved[taskId] = true;
       const task = TASKS_INF.find(t => t.id === taskId);
       if (task) {
-        const theme = THEMES_INF.find(t => t.taskIds.includes(task.id));
-        if (theme) updateTopicStats(theme.id, true);
+        const theme = THEMES_INF.find(t => t.id === task.themeId);
+        if (theme) {
+          updateTopicStats(theme.id, true);
+          // Адаптивная статистика
+          if (!state.adaptiveStats[theme.id]) state.adaptiveStats[theme.id] = { solved: 0, correct: 0 };
+          state.adaptiveStats[theme.id].solved++;
+          state.adaptiveStats[theme.id].correct++;
+        }
       }
       updateStreak();
       recomputeAchievements();
@@ -3063,10 +3489,12 @@
       saveState(state);
 
       const solvedCount = TASKS_INF.filter(t => state.solved[t.id]).length;
-      if (solvedCount === 1) { toast("🏆 Достижение!", "Первая пятёрка — открыто!", "ok"); addNotification("🏆 Достижение", "Первая пятёрка", "#/progress"); }
-      if (solvedCount === 3) { toast("🏆 Достижение!", "В ударе — решено 3 задания!", "ok"); addNotification("🏆 Достижение", "В ударе (3 задачи)", "#/progress"); }
-      if (solvedCount === 5) { toast("🏆 Достижение!", "Ударник труда — решено 5 заданий!", "ok"); addNotification("🏆 Достижение", "Ударник труда (5 задач)", "#/progress"); }
-      if (solvedCount === 50) { toast("🏆 Достижение!", "50 задач — круто!", "ok"); addNotification("🏆 Достижение", "50 задач решено!", "#/progress"); }
+      if (solvedCount === 1) { toast("🏆 Достижение!", "Первая пятёрка — открыто!", "ok"); addNotification("🏆 Достижение", "Первая пятёрка", "#/achievements"); }
+      if (solvedCount === 3) { toast("🏆 Достижение!", "В ударе — решено 3 задания!", "ok"); addNotification("🏆 Достижение", "В ударе (3 задачи)", "#/achievements"); }
+      if (solvedCount === 5) { toast("🏆 Достижение!", "Ударник труда — решено 5 заданий!", "ok"); addNotification("🏆 Достижение", "Ударник труда (5 задач)", "#/achievements"); }
+      if (solvedCount === 10) { toast("🏆 Достижение!", "10 задач — круто!", "ok"); addNotification("🏆 Достижение", "10 задач решено", "#/achievements"); }
+      if (solvedCount === 50) { toast("🏆 Достижение!", "50 задач — круто!", "ok"); addNotification("🏆 Достижение", "50 задач решено!", "#/achievements"); }
+      if (solvedCount === 100) { toast("🏆 Достижение!", "100 задач — вы герой!", "ok"); addNotification("🏆 Достижение", "100 задач решено!", "#/achievements"); }
     }
 
     function updateTopicStats(topicId, correct) {
@@ -3077,17 +3505,47 @@
       saveState(state);
     }
 
-    function getRecommendations() {
-      const stats = state.topicStats || {};
-      const results = [];
-      for (const topicId in stats) {
-        const s = stats[topicId];
-        if (s.total < 2) continue;
-        const pct = Math.round((s.correct / s.total) * 100);
-        results.push({ topicId, pct, total: s.total });
-      }
-      results.sort((a,b) => a.pct - b.pct);
-      return results.slice(0, 3);
+    // ---- СТРАНИЦА ДОСТИЖЕНИЙ ----
+    function renderAchievements() {
+      const a = state.achievements;
+      // Список всех достижений с иконками, описанием, прогрессом
+      const achievementsList = [
+        { id: 'first', name: 'Первая пятёрка', desc: 'Решите одно задание', icon: '🌟', unlocked: a.first, progress: TASKS_INF.filter(t => state.solved[t.id]).length >= 1 ? 100 : 0 },
+        { id: 'three', name: 'В ударе', desc: 'Решите 3 задания', icon: '🔥', unlocked: a.three, progress: Math.min(100, (TASKS_INF.filter(t => state.solved[t.id]).length / 3) * 100) },
+        { id: 'five', name: 'Ударник труда', desc: 'Решите 5 заданий', icon: '💪', unlocked: a.five, progress: Math.min(100, (TASKS_INF.filter(t => state.solved[t.id]).length / 5) * 100) },
+        { id: 'ten', name: '10 задач', desc: 'Решите 10 заданий', icon: '🎯', unlocked: a.ten, progress: Math.min(100, (TASKS_INF.filter(t => state.solved[t.id]).length / 10) * 100) },
+        { id: 'fifty', name: '50 задач', desc: 'Решите 50 заданий', icon: '🏅', unlocked: a.fifty, progress: Math.min(100, (TASKS_INF.filter(t => state.solved[t.id]).length / 50) * 100) },
+        { id: 'hundred', name: '100 задач', desc: 'Решите 100 заданий', icon: '👑', unlocked: a.hundred, progress: Math.min(100, (TASKS_INF.filter(t => state.solved[t.id]).length / 100) * 100) },
+        { id: 'week', name: 'Неделя подряд', desc: 'Заниматься 7 дней подряд', icon: '📆', unlocked: a.week, progress: Math.min(100, (state.streak?.count || 0) / 7 * 100) },
+        { id: 'allMistakes', name: 'Все ошибки', desc: 'Исправить все ошибки', icon: '✅', unlocked: a.allMistakes, progress: state.mistakes.length === 0 ? 100 : 0 },
+        { id: 'firstExam', name: 'Первый экзамен', desc: 'Пройти первый экзамен', icon: '📝', unlocked: a.firstExam, progress: a.firstExam ? 100 : 0 }
+      ];
+
+      // Подсчёт общего прогресса достижений
+      const totalAchievements = achievementsList.length;
+      const unlockedCount = achievementsList.filter(ach => ach.unlocked).length;
+
+      $main.innerHTML = `
+        <div class="section-title">🏆 Достижения</div>
+        <div class="card pad" style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span>Открыто: <strong>${unlockedCount}/${totalAchievements}</strong></span>
+            <span class="chip">${Math.round(unlockedCount/totalAchievements*100)}%</span>
+          </div>
+          <div class="bar"><i style="width:${unlockedCount/totalAchievements*100}%;"></i></div>
+        </div>
+        <div class="achievement-grid">
+          ${achievementsList.map(ach => `
+            <div class="ach-card ${ach.unlocked ? 'unlocked' : ''}">
+              <div class="ach-icon">${ach.icon}</div>
+              <div class="ach-name">${escapeHtml(ach.name)}</div>
+              <div class="ach-desc">${escapeHtml(ach.desc)}</div>
+              <div class="ach-progress"><i style="width:${ach.progress}%;"></i></div>
+              <div style="font-size:12px;margin-top:4px;color:var(--muted);">${ach.unlocked ? '✅' : '⬜'} ${Math.round(ach.progress)}%</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
     }
 
     // ---- ПРОГРЕСС ----
@@ -3098,8 +3556,8 @@
       const solvedCount = TASKS_INF.filter(t => state.solved[t.id]).length;
 
       const themeStatsInf = THEMES_INF.map(theme => {
-        const total = theme.taskIds.length;
-        const solved = theme.taskIds.filter(id => state.solved[id]).length;
+        const total = TASKS_INF.filter(t => t.themeId === theme.id).length;
+        const solved = TASKS_INF.filter(t => t.themeId === theme.id && state.solved[t.id]).length;
         const percent = total ? Math.round(solved/total*100) : 0;
         return { name: theme.name, solved, total, percent };
       });
@@ -3118,7 +3576,9 @@
       if (solvedCount < 1) nextGoalText = "До «Первой пятёрки» решите 1 задание.";
       else if (solvedCount < 3) nextGoalText = `До «В ударе» осталось ${3 - solvedCount} задания.`;
       else if (solvedCount < 5) nextGoalText = `До «Ударник труда» осталось ${5 - solvedCount} задания.`;
+      else if (solvedCount < 10) nextGoalText = `До «10 задач» осталось ${10 - solvedCount} заданий.`;
       else if (solvedCount < 50) nextGoalText = `До «50 задач» осталось ${50 - solvedCount} заданий.`;
+      else if (solvedCount < 100) nextGoalText = `До «100 задач» осталось ${100 - solvedCount} заданий.`;
       else nextGoalText = "Поздравляем! Все достижения получены! 🎉";
 
       $main.innerHTML = `
@@ -3142,12 +3602,17 @@
           </div>
         </div>
 
-        <div class="section-title">Достижения <span class="chip">${a.first ? 1 : 0}/${a.three ? 2 : 0}/${a.five ? 3 : 0}/${a.fifty ? 4 : 0}</span></div>
+        <div class="section-title">Достижения</div>
         <div class="ach">
           ${achRow("Первая пятёрка", "Решить одно задание", a.first)}
           ${achRow("В ударе", "Решить 3 задания", a.three)}
           ${achRow("Ударник труда", "Решить 5 заданий", a.five)}
+          ${achRow("10 задач", "Решить 10 заданий", a.ten)}
           ${achRow("50 задач", "Решить 50 заданий", a.fifty)}
+          ${achRow("100 задач", "Решить 100 заданий", a.hundred)}
+          ${achRow("Неделя подряд", "Заниматься 7 дней подряд", a.week)}
+          ${achRow("Все ошибки", "Исправить все ошибки", a.allMistakes)}
+          ${achRow("Первый экзамен", "Пройти первый экзамен", a.firstExam)}
         </div>
         <div class="next-goal">${nextGoalText}</div>
 
@@ -3205,7 +3670,7 @@
       `;
     }
 
-    // ---- НАСТРОЙКИ (сброс только здесь) ----
+    // ---- НАСТРОЙКИ ----
     function renderSettings(){
       const theme = state.theme;
       $main.innerHTML = `
@@ -3364,7 +3829,6 @@
       const sessionAttempts = window._trainingAttempts[taskKey] || 0;
       const canShowSolution = sessionAttempts >= 3;
 
-      // Подсчёт прогресса исправления ошибок
       const review = state.mistakeReview;
       let progressHtml = '';
       if (review && review.total > 0) {
@@ -3417,12 +3881,16 @@
         if (userAns === correct) {
           toast("✅ Верно!", "Отлично", "ok");
           updateTopicStats(currentTopic, true);
+          // Обновляем адаптивную статистику
+          if (!state.adaptiveStats[currentTopic]) state.adaptiveStats[currentTopic] = { solved: 0, correct: 0 };
+          state.adaptiveStats[currentTopic].solved++;
+          state.adaptiveStats[currentTopic].correct++;
+          saveState(state);
+
           document.getElementById("trainSolutionBox").style.display = "block";
           document.getElementById("solutionTrainBtn").style.display = "inline-flex";
           document.getElementById("trainHint").classList.remove("show");
-          // Если это была ошибка
           if (reviewingMistakeId) {
-            // Увеличиваем счётчик исправленных
             if (state.mistakeReview) {
               state.mistakeReview.fixed = (state.mistakeReview.fixed || 0) + 1;
               saveState(state);
@@ -3445,13 +3913,11 @@
               renderTrainingUI();
               toast("Переход к следующей ошибке", `Осталось ${reviewingMistakesQueue.length}`, "ok");
             } else {
-              // Все ошибки исправлены
               const review = state.mistakeReview;
               const elapsed = Math.floor((Date.now() - review.startTime) / 1000);
               const minutes = Math.floor(elapsed / 60);
               const seconds = elapsed % 60;
               const timeStr = minutes > 0 ? `${minutes} минут ${seconds} секунд` : `${seconds} секунд`;
-              // Показываем экран завершения
               showMistakeComplete(timeStr);
             }
           }
@@ -3461,11 +3927,14 @@
           toast("❌ Неверно", "Ошибка записана в раздел «Мои ошибки»", "bad");
           document.getElementById("trainAnswer").classList.add("input-error");
           updateTopicStats(currentTopic, false);
+          // Адаптивная статистика
+          if (!state.adaptiveStats[currentTopic]) state.adaptiveStats[currentTopic] = { solved: 0, correct: 0 };
+          state.adaptiveStats[currentTopic].solved++;
+          saveState(state);
+
           if (!reviewingMistakeId) {
-            // Добавляем ошибку, но если она уже есть, увеличиваем счётчик
             addMistake(currentTopic, task.text, task.answer, task.explanation, userAns);
           } else {
-            // Увеличиваем счётчик попыток у существующей ошибки
             const mistake = state.mistakes.find(m => m.id === reviewingMistakeId);
             if (mistake) {
               mistake.mistakeAttempts = (mistake.mistakeAttempts || 1) + 1;
@@ -3532,7 +4001,6 @@
         toast("Нет ошибок", "Все задания решены верно! 🎉", "ok");
         return;
       }
-      // Создаём запись о работе над ошибками
       state.mistakeReview = {
         total: state.mistakes.length,
         fixed: 0,
@@ -3558,11 +4026,24 @@
     function removeMistakeById(id) {
       state.mistakes = state.mistakes.filter(m => m.id !== id);
       saveState(state);
+      // Проверяем достижение "Все ошибки"
+      if (state.mistakes.length === 0 && !state.achievements.allMistakes) {
+        state.achievements.allMistakes = true;
+        addNotification("🏆 Достижение", "Все ошибки исправлены!", "#/achievements");
+        toast("🏆 Достижение!", "Все ошибки исправлены!", "ok");
+        saveState(state);
+      }
     }
 
-    // ---- ЭКРАН ЗАВЕРШЕНИЯ РАБОТЫ НАД ОШИБКАМИ ----
     function showMistakeComplete(timeStr) {
       const total = state.mistakeReview?.total || 0;
+      // Добавляем достижение за исправление всех ошибок
+      if (!state.achievements.allMistakes) {
+        state.achievements.allMistakes = true;
+        addNotification("🏆 Достижение", "Все ошибки исправлены!", "#/achievements");
+        toast("🏆 Достижение!", "Все ошибки исправлены!", "ok");
+        saveState(state);
+      }
       $main.innerHTML = `
         <div class="card pad complete-screen">
           <div class="big-icon">🎉</div>
@@ -3588,12 +4069,9 @@
       });
     }
 
-    // ---- РАЗДЕЛ МОИ ОШИБКИ (обновлённый) ----
     function renderMistakesList() {
       if (!state.mistakes.length) {
-        // Проверяем, не был ли только что завершён процесс
         if (state.mistakeReview && state.mistakeReview.total > 0) {
-          // Если есть запись о работе, но ошибок нет - показываем завершение
           const elapsed = Math.floor((Date.now() - state.mistakeReview.startTime) / 1000);
           const minutes = Math.floor(elapsed / 60);
           const seconds = elapsed % 60;
@@ -3612,8 +4090,6 @@
       });
 
       const totalMistakes = state.mistakes.length;
-
-      // Строим строку сгруппированных тем
       const topicRows = Object.entries(grouped).map(([topicId, items]) => {
         const topicName = TRAINING_TOPICS.find(t=>t.id===topicId)?.name || topicId;
         return `${topicName} (${items.length})`;
@@ -3671,7 +4147,6 @@
           const topicId = btn.getAttribute("data-repeat-topic");
           const mistakes = state.mistakes.filter(m => m.topicId === topicId);
           if (mistakes.length === 0) return;
-          // Запускаем повтор только ошибок этой темы
           reviewingMistakesQueue = mistakes.slice();
           const first = reviewingMistakesQueue.shift();
           reviewingMistakeId = first.id;
@@ -3683,7 +4158,6 @@
             topicId: topicId
           };
           window._trainingAttempts = {};
-          // Создаём запись о работе
           state.mistakeReview = {
             total: mistakes.length,
             fixed: 0,
@@ -3709,7 +4183,6 @@
               topicId: mistake.topicId
             };
             window._trainingAttempts = {};
-            // Создаём запись о работе (только одна ошибка)
             state.mistakeReview = {
               total: 1,
               fixed: 0,
@@ -3739,14 +4212,10 @@
       });
     }
 
-    // ---- УЛУЧШЕННАЯ addMistake (с учётом дубликатов) ----
     function addMistake(topicId, question, correctAnswer, explanation, userAnswer) {
-      // Проверяем, есть ли уже такая ошибка (по вопросу)
       const existing = state.mistakes.find(m => m.question === question);
       if (existing) {
-        // Увеличиваем счётчик попыток
         existing.mistakeAttempts = (existing.mistakeAttempts || 1) + 1;
-        // Обновляем последний неверный ответ
         existing.userAnswer = userAnswer;
         saveState(state);
         return;
@@ -3755,7 +4224,7 @@
         id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
         topicId, question, correctAnswer, explanation, userAnswer,
         date: new Date().toLocaleString(),
-        mistakeAttempts: 1 // счётчик ошибок для этой записи
+        mistakeAttempts: 1
       });
       if (state.mistakes.length > 100) state.mistakes.pop();
       saveState(state);
